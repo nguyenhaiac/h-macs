@@ -1,0 +1,440 @@
+#+TITLE: Emacs configuration file
+#+AUTHOR: Nguyen Tien Hai
+#+BABEL: :cache yes
+#+PROPERTY: header-args :tangle ~/.emacs.d/init.el
+#+BEGIN_SRC emacs-lisp
+;;; -*- lexical-binding: t -*-
+#+END_SRC
+
+
+* Initialize the configuration
+** Tangle & byte compile
+
+Tangle and byte compile
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+(defun my--tangle-byte-compile-org ()
+ "Tangles emacs.org and byte compiles ~/.emacs.d/"
+   (interactive)
+   (when (equal (buffer-name)
+                (concat "init.org"))
+     (org-babel-tangle)
+     (byte-recompile-directory (expand-file-name user-emacs-directory) 0)))
+#+END_SRC
+
+Tangle
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+(defun my--tangle-org ()
+ "Tangles emacs.org and byte compiles ~/.emacs.d/"
+   (interactive)
+   (when (equal (buffer-name)
+                (concat "init.org"))
+     (org-babel-tangle)))
+(add-hook 'after-save-hook #'my--tangle-org)
+#+END_SRC
+
+** Bootstrap straight.el
+*** Install straight.el if not yet
+#+BEGIN_SRC emacs-lisp :tangle yes
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+      (bootstrap-version 5))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
+#+END_SRC
+*** Install use-package and set it to use straight by default
+#+BEGIN_SRC emacs-lisp :tangle yes
+(straight-use-package 'use-package)
+(setq straight-use-package-by-default t)
+(straight-use-package 'org-plus-contrib)
+(require 'org-tempo)
+#+END_SRC
+
+** Better-default 
+#+begin_src emacs-lisp
+  (use-package better-defaults)
+  (setq make-backup-files nil) ; stop creating backup~ files
+  (setq auto-save-default nil) ; stop creating #autosave# files
+  (setq create-lockfiles nil)  ; stop creating .# files
+  (global-auto-revert-mode t)
+  (fset 'yes-or-no-p 'y-or-n-p)
+  (setq
+   cursor-in-non-selected-windows t  ; Hide the cursor in inactive windows
+   inhibit-splash-screen t
+   default-frame-alist '((font . "Source Code Pro-12"))
+   echo-keystrokes 0.1               ; Show keystrokes right away, don't show the message in the scratch buffe
+   initial-scratch-message nil       ; Empty scratch buffer
+   initial-major-mode 'org-mode      ; org mode by default
+   custom-safe-themes t
+   confirm-kill-emacs 'y-or-n-p      ; y and n instead of yes and no when quitting
+   )
+#+end_src
+* Utilities setup
+** ivy and counsel bundle
+#+begin_src emacs-lisp
+  (use-package ivy
+    :diminish ivy-mode
+    :config
+    (ivy-mode 1)
+    (setq ivy-use-virtual-buffers t)
+    (setq ivy-count-format "(%d/%d) ")
+    (setq enable-recursive-minibuffers t)
+    (setq ivy-initial-inputs-alist nil)
+    (setq ivy-re-builders-alist
+    '((swiper . ivy--regex-plus)
+     (t      . ivy--regex-fuzzy))))
+  (use-package counsel
+    :diminish counsel-mode
+    :config
+    (counsel-mode 1))
+  (use-package smex)
+  (use-package flx)
+  (use-package avy)
+#+end_src
+
+** Autocompletion with company-mode
+#+begin_src emacs-lisp
+  (use-package company
+      :config
+      (setq company-idle-delay 0.0
+            company-minimum-prefix-length 1)
+      (global-company-mode))
+#+end_src
+** Posframe and ivy-posframe
+#+begin_src emacs-lisp
+  (use-package posframe)
+  (use-package ivy-posframe
+    :config
+    (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-point)))
+    (ivy-posframe-mode 1))
+#+end_src
+** Whichkey
+#+begin_src emacs-lisp
+  (use-package which-key
+    :config
+    (which-key-mode))
+#+end_src
+** Deft and zettledeft
+*** Deft
+#+begin_src emacs-lisp
+  (use-package deft
+    :defer t
+    :commands (deft))
+  (setq deft-directory "~/Dropbox/Archives"
+                      deft-text-mode 'org-mode
+                      deft-extensions '("org")
+                      deft-recursive t
+                      deft-use-filename-as-title nil)
+  (setq deft-file-naming-rules
+        '((noslash . "-")
+          (nospace . "-")
+          (case-fn . downcase)))
+  (setq deft-org-mode-title-prefix t)
+#+end_src
+*** Zetteldeft
+#+begin_src emacs-lisp
+  (use-package zetteldeft
+    :straight (zetteldeft :type git :host github :repo "EFLS/zetteldeft"))
+#+end_src
+
+** Smartparens
+#+begin_src emacs-lisp
+  (use-package smartparens
+    :config
+    (smartparens-global-mode)
+    (require 'smartparens-config))
+#+end_src
+
+** hydra
+#+begin_src emacs-lisp
+  (use-package hydra)
+#+end_src
+*** Some useful hydra
+**** Orgclock timer
+#+begin_src emacs-lisp :tangle yes
+  (defhydra hydra-org-clock (:color blue :hint nil)
+     "
+  Clock   In/out^     ^Edit^   ^Summary     (_?_)
+  -----------------------------------------
+          _i_n         _e_dit   _g_oto entry
+          _c_ontinue   _q_uit   _d_isplay
+          _o_ut        ^ ^      _r_eport
+        "
+     ("i" org-clock-in)
+     ("o" org-clock-out)
+     ("c" org-clock-in-last)
+     ("e" org-clock-modify-effort-estimate)
+     ("q" org-clock-cancel)
+     ("g" org-clock-goto)
+     ("d" org-clock-display)
+     ("r" org-clock-report)
+     ("?" (org-info "Clocking commands")))
+#+end_src
+**** Smartparens
+#+begin_src emacs-lisp
+  (defhydra hydra-smartparens (:hint nil)
+    "
+   Moving^^^^                       Slurp & Barf^^   Wrapping^^            Sexp juggling^^^^               Destructive
+  ------------------------------------------------------------------------------------------------------------------------
+   [_a_] beginning  [_n_] down      [_h_] bw slurp   [_R_]   rewrap        [_S_] split   [_t_] transpose   [_c_] change inner  [_w_] copy
+   [_e_] end        [_N_] bw down   [_H_] bw barf    [_u_]   unwrap        [_s_] splice  [_A_] absorb      [_C_] change outer
+   [_f_] forward    [_p_] up        [_l_] slurp      [_U_]   bw unwrap     [_r_] raise   [_E_] emit        [_k_] kill          [_g_] quit
+   [_b_] backward   [_P_] bw up     [_L_] barf       [_(__{__[_] wrap (){}[]   [_j_] join    [_o_] convolute   [_K_] bw kill       [_q_] quit"
+    ;; Moving
+    ("a" sp-beginning-of-sexp)
+    ("e" sp-end-of-sexp)
+    ("f" sp-forward-sexp)
+    ("b" sp-backward-sexp)
+    ("n" sp-down-sexp)
+    ("N" sp-backward-down-sexp)
+    ("p" sp-up-sexp)
+    ("P" sp-backward-up-sexp)
+
+    ;; Slurping & barfing
+    ("h" sp-backward-slurp-sexp)
+    ("H" sp-backward-barf-sexp)
+    ("l" sp-forward-slurp-sexp)
+    ("L" sp-forward-barf-sexp)
+
+    ;; Wrapping
+    ("R" sp-rewrap-sexp)
+    ("u" sp-unwrap-sexp)
+    ("U" sp-backward-unwrap-sexp)
+    ("(" sp-wrap-round)
+    ("{" sp-wrap-curly)
+    ("[" sp-wrap-square)
+
+    ;; Sexp juggling
+    ("S" sp-split-sexp)
+    ("s" sp-splice-sexp)
+    ("r" sp-raise-sexp)
+    ("j" sp-join-sexp)
+    ("t" sp-transpose-sexp)
+    ("A" sp-absorb-sexp)
+    ("E" sp-emit-sexp)
+    ("o" sp-convolute-sexp)
+
+    ;; Destructive editing
+    ("c" sp-change-inner :exit t)
+    ("C" sp-change-enclosing :exit t)
+    ("k" sp-kill-sexp)
+    ("K" sp-backward-kill-sexp)
+    ("w" sp-copy-sexp)
+
+    ("q" nil)
+    ("g" nil))
+#+end_src
+**** Lsp mode
+#+begin_src emacs-lisp :tangle yes
+  (defhydra hydra-lsp (:exit t :hint nil)
+    "
+   Buffer^^               Server^^                   Symbol
+  -------------------------------------------------------------------------------------
+   [_f_] format           [_M-r_] restart            [_d_] declaration  [_i_] implementation  [_o_] documentation
+   [_m_] imenu            [_S_]   shutdown           [_D_] definition   [_t_] type            [_r_] rename
+   [_x_] execute action   [_M-s_] describe session   [_R_] references   [_s_] signature"
+    ("d" lsp-find-declaration)
+    ("D" lsp-ui-peek-find-definitions)
+    ("R" lsp-ui-peek-find-references)
+    ("i" lsp-ui-peek-find-implementation)
+    ("t" lsp-find-type-definition)
+    ("s" lsp-signature-help)
+    ("o" lsp-describe-thing-at-point)
+    ("r" lsp-rename)
+
+    ("f" lsp-format-buffer)
+    ("m" lsp-ui-imenu)
+    ("x" lsp-execute-code-action)
+
+    ("M-s" lsp-describe-session)
+    ("M-r" lsp-restart-workspace)
+    ("S" lsp-shutdown-workspace))
+#+end_src
+**** Apropos commands
+#+begin_src emacs-lisp :tangle yes
+  (defhydra hydra-apropos (:color blue)
+    "Apropos"
+    ("a" apropos "apropos")
+    ("c" apropos-command "cmd")
+    ("d" apropos-documentation "doc")
+    ("e" apropos-value "val")
+    ("l" apropos-library "lib")
+    ("o" apropos-user-option "option")
+    ("u" apropos-user-option "option")
+    ("v" apropos-variable "var")
+    ("i" info-apropos "info")
+    ("t" tags-apropos "tags")
+    ("z" hydra-customize-apropos/body "customize"))
+#+end_src
+**** Transposing
+#+begin_src emacs-lisp :tangle yes
+  (defhydra hydra-transpose (:color red)
+  "Transpose"
+   ("c" transpose-chars "characters")
+   ("w" transpose-words "words")
+   ("o" org-transpose-words "Org mode words")
+   ("l" transpose-lines "lines")
+   ("s" transpose-sentences "sentences")
+   ("e" org-transpose-elements "Org mode elements")
+   ("p" transpose-paragraphs "paragraphs")
+   ("t" org-table-transpose-table-at-point "Org mode table")
+   ("q" nil "cancel" :blue color))
+#+end_src
+**** Rectangle operation
+#+begin_src emacs-lisp :tangle yes
+  (defhydra hydra-rectangle (:body-pre (rectangle-mark-mode 1)
+                                       :color pink
+                                       :hint nil
+                                       :post (deactivate-mark))
+    "
+    ^_u_^       _w_ copy      _o_pen       _N_umber-lines            |\\     -,,,--,,_
+  _n_   _i_     _y_ank        _t_ype       _e_xchange-point          /,`.-'`'   ..  \-;;,_
+    ^_e_^       _d_ kill      _c_lear      _r_eset-region-mark      |,4-  ) )_   .;.(  `'-'
+  ^^^^          _U_ndo        _g_ quit     ^ ^                     '---''(./..)-'(_\_)
+  "
+   ("u" rectangle-previous-line)
+   ("e" rectangle-next-line)
+   ("n" rectangle-backward-char)
+   ("i" rectangle-forward-char)
+   ("d" kill-rectangle)                    ;; C-x r k
+   ("y" yank-rectangle)                    ;; C-x r y
+   ("w" copy-rectangle-as-kill)            ;; C-x r M-w
+   ("o" open-rectangle)                    ;; C-x r o
+   ("t" string-rectangle)                  ;; C-x r t
+   ("c" clear-rectangle)                   ;; C-x r c
+   ("e" rectangle-exchange-point-and-mark) ;; C-x C-x
+   ("N" rectangle-number-lines)            ;; C-x r N
+   ("r" (if (region-active-p)
+            (deactivate-mark)
+          (rectangle-mark-mode 1)))
+   ("U" undo nil)
+   ("g" nil))
+#+end_src
+* Programming setup
+** Magit - the king of git
+#+begin_src emacs-lisp :tangle yes
+ (use-package magit)
+#+END_SRC
+** Python with elpy
+#+begin_src emacs-lisp :tangle yes
+  (use-package elpy
+    :config
+    (elpy-enable))
+#+END_SRC
+** Python debugging with realgud
+#+begin_src emacs-lisp :tangle yes
+  (use-package realgud)
+#+END_SRC
+** Python with lsp mode
+#+begin_src emacs-lisp :tangle no
+  (use-package lsp-mode
+    :commands lsp
+    :hook (prog-mode . lsp))
+  (use-package company-lsp :commands company-lsp)
+  (use-package helm-lsp :commands helm-lsp-workspace-symbol)
+#+end_src
+** pyvenv
+#+begin_src emacs-lisp :tangle yes
+  (use-package pyvenv)
+#+end_src
+** C programming setup
+#+begin_src emacs-lisp :tangle yes
+  (use-package company-irony
+    :config
+    (add-to-list 'company-backends 'company-irony))
+
+  (use-package irony
+    :hook ((c++-mode-hook . irony-mode)
+           (c-mode-hook . irony-mode)
+           (irony-mode-hook . irony-cdb-autosetup-compile-options)))
+#+end_src
+** vterm
+#+begin_src emacs-lisp :tangle no
+
+  (use-package vterm)
+
+#+end_src
+** rustic - rust mode for emacs
+#+begin_src emacs-lisp :tangle yes
+  (use-package rustic)
+#+end_src
+** yaml-mode
+#+begin_src emacs-lisp :tangle yes
+  (use-package yaml-mode)
+#+end_src
+* Keybindings for specific modes
+** Install general
+#+begin_src emacs-lisp
+  (use-package general)
+#+end_src
+** For windows movement
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (general-define-key
+   :keymaps 'global
+   "C-x [" 'previous-buffer
+   "C-x ]" 'next-buffer
+   )
+  (use-package ace-window
+    :config
+    (global-set-key (kbd "M-o") 'ace-window)
+    (setq aw-dispatch-always t)
+    (setq aw-keys '(?a ?r ?s ?t ?d ?h ?n ?e ?i))
+    (defvar aw-dispatch-alist
+    '((?x aw-delete-window "Delete Window")
+	  (?w aw-swap-window "Swap Windows")
+	  (?M aw-move-window "Move Window")
+	  (?c aw-copy-window "Copy Window")
+	  (?j aw-switch-buffer-in-window "Select Buffer")
+	  (?f aw-flip-window)
+	  (?u aw-switch-buffer-other-window "Switch Buffer Other Window")
+	  (?c aw-split-window-fair "Split Fair Window")
+	  (?v aw-split-window-vert "Split Vert Window")
+	  (?b aw-split-window-horz "Split Horz Window")
+	  (?o delete-other-windows "Delete Other Windows")
+	  (?? aw-show-dispatch-help))
+    "List of actions for `aw-dispatch-default'.")
+  )
+#+END_SRC
+** For orgmode navigation
+#+begin_src emacs-lisp :tangle yes
+  (general-define-key
+   :keymap 'org-mode-map
+   "H-n" 'org-next-visible-heading
+   "H-p" 'org-previous-visible-heading
+   "H-b" 'org-backward-heading-same-level
+   "H-f" 'org-forward-heading-same-level
+   )
+  (general-define-key
+   :keymaps 'global
+   "C-c o" 'pop-to-org-agenda
+   "C-c c" 'org-capture
+   "C-c n" '((lambda() (interactive)(org-capture nil "n")) :which-key "Taking notes")
+   "C-c f" 'hai/helm-org-rifle-archives
+   "H-," 'my-pop-local-mark-ring
+   "H-." 'unpop-to-mark-command
+   )
+#+end_src
+* Helper functions
+#+begin_src emacs-lisp
+  (defun my-pop-local-mark-ring ()
+    (interactive)
+    (set-mark-command t))
+
+  (defun unpop-to-mark-command ()
+    "Unpop off mark ring. Does nothing if mark ring is empty."
+    (interactive)
+        (when mark-ring
+          (setq mark-ring (cons (copy-marker (mark-marker)) mark-ring))
+          (set-marker (mark-marker) (car (last mark-ring)) (current-buffer))
+          (when (null (mark t)) (ding))
+          (setq mark-ring (nbutlast mark-ring))
+          (goto-char (marker-position (car (last mark-ring))))))
+#+end_src
