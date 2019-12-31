@@ -61,6 +61,7 @@ Tangle
 ** Better-default 
 #+begin_src emacs-lisp
   (use-package better-defaults)
+  (setq-default cursor-type 'bar)
   (setq make-backup-files nil) ; stop creating backup~ files
   (setq auto-save-default nil) ; stop creating #autosave# files
   (setq create-lockfiles nil)  ; stop creating .# files
@@ -318,6 +319,30 @@ Tangle
    ("U" undo nil)
    ("g" nil))
 #+end_src
+** Undo-fu
+#+begin_src emacs-lisp
+  (use-package undo-tree
+    :config
+    (global-undo-tree-mode))
+#+end_src
+* Aesthetic improvement
+** Doom themes
+#+begin_src emacs-lisp
+  (use-package doom-themes
+    :config
+    (setq doom-themes-enable-bold t
+          doom-themes-enable-italic t)
+    (load-theme 'doom-one t))
+#+end_src
+** Smart-mode-line
+#+begin_src emacs-lisp
+  (use-package smart-mode-line-atom-one-dark-theme)
+  (use-package smart-mode-line
+    :config
+    (setq sml/theme 'atom-one-dark)
+    (sml/setup)
+    (add-to-list 'sml/replacer-regexp-list '("^~/Dropbox/" ":DBox:")))
+#+end_src
 * Programming setup
 ** Magit - the king of git
 #+begin_src emacs-lisp :tangle yes
@@ -412,15 +437,51 @@ Tangle
    "H-b" 'org-backward-heading-same-level
    "H-f" 'org-forward-heading-same-level
    )
+#+end_src
+** Prefix commands
+*** Hyper-C prefix
+#+begin_src emacs-lisp
   (general-define-key
    :keymaps 'global
-   "C-c o" 'pop-to-org-agenda
-   "C-c c" 'org-capture
-   "C-c n" '((lambda() (interactive)(org-capture nil "n")) :which-key "Taking notes")
-   "C-c f" 'hai/helm-org-rifle-archives
+   :prefix "H-c"
+   "d" '(:ignore t :which-key "Deft")
+   "dd" 'deft
+   "dn" 'zetteldeft-new-file
+   "dN" 'zetteldeft-new-file-and-link
+   "dr" 'zetteldeft-file-rename
+   "ds" 'zetteldeft-search-at-point
+   "dc" 'zetteldeft-search-current-id
+   "df" 'zetteldeft-follow-link
+   "dF" 'zetteldeft-avy-file-search-ace-window
+   "dl" 'zetteldeft-avy-link-search
+   "dt" 'zetteldeft-avy-tag-search
+   "dT" 'zetteldeft-tag-buffer
+   "di" 'zetteldeft-find-file-id-insert
+   "dI" 'zetteldeft-find-file-full-title-insert
+   "do" 'zetteldeft-find-file
+   )
+#+end_src
+*** Control-C prefix
+#+begin_src emacs-lisp
+  (general-define-key
+   :keymaps 'global
+   :prefix "C-c"
+   "o" 'pop-to-org-agenda
+   "c" 'org-capture
+   "n" '((lambda() (interactive)(org-capture nil "n")) :which-key "Taking notes")
+   "f" 'hai/helm-org-rifle-archives
+   )
+#+end_src
+*** Non-prefix keybindings
+#+begin_src emacs-lisp
+  (general-define-key
+   :keymaps 'global
    "H-," 'my-pop-local-mark-ring
    "H-." 'unpop-to-mark-command
-   )
+   "H-<" 'previous-buffer
+   "H->" 'next-buffer
+   "M-<SPC>" 'set-mark-command
+  )
 #+end_src
 * Helper functions
 #+begin_src emacs-lisp
