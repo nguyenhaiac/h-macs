@@ -400,6 +400,11 @@ Tangle
 #+begin_src emacs-lisp
   (use-package general)
 #+end_src
+** Unbind keybindings
+#+begin_src emacs-lisp
+  (general-unbind
+    "C-/")
+#+end_src
 ** For windows movement
 #+BEGIN_SRC emacs-lisp :tangle yes
   (general-define-key
@@ -466,22 +471,38 @@ Tangle
   (general-define-key
    :keymaps 'global
    :prefix "C-c"
-   "o" 'pop-to-org-agenda
+   "o" 'org-agenda
    "c" 'org-capture
    "n" '((lambda() (interactive)(org-capture nil "n")) :which-key "Taking notes")
    "f" 'hai/helm-org-rifle-archives
+   "w" 'hydra-org-clock/body
+   "s" 'hydra-smartparens/body
+   "l" 'hydra-lsp/body
+   "a" 'hydra-apropos/body
+   "t" 'hydra-transpose/body
    )
 #+end_src
-*** Non-prefix keybindings
+** Non-prefix keybindings
+#+begin_src emacs-lisp
+    (general-define-key
+     :keymaps 'global
+     "H-," 'my-pop-local-mark-ring
+     "H-." 'unpop-to-mark-command
+     "H-<" 'previous-buffer
+     "H->" 'next-buffer
+     "M-<SPC>" 'set-mark-command
+     "C-z" 'undo-tree-undo
+     "C-S-z" 'undo-tree-redo
+     "C-s" 'swiper-isearch
+    )
+#+end_src
+** Smartparens
 #+begin_src emacs-lisp
   (general-define-key
-   :keymaps 'global
-   "H-," 'my-pop-local-mark-ring
-   "H-." 'unpop-to-mark-command
-   "H-<" 'previous-buffer
-   "H->" 'next-buffer
-   "M-<SPC>" 'set-mark-command
-  )
+   :keymaps 'smartparens-mode-map
+   "C-M-f" 'sp-forward-sexp
+   "C-M-b" 'sp-backward-sexp
+   "C-M-u" 'sp-unwrap-sexp)
 #+end_src
 * Helper functions
 #+begin_src emacs-lisp
