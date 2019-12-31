@@ -61,6 +61,7 @@ Tangle
 ** Better-default 
 #+begin_src emacs-lisp
   (use-package better-defaults)
+  (global-hl-line-mode 1)
   (setq-default cursor-type 'bar)
   (setq make-backup-files nil) ; stop creating backup~ files
   (setq auto-save-default nil) ; stop creating #autosave# files
@@ -77,6 +78,7 @@ Tangle
    custom-safe-themes t
    confirm-kill-emacs 'y-or-n-p      ; y and n instead of yes and no when quitting
    )
+  (modify-syntax-entry ?_ "w")
 #+end_src
 * Utilities setup
 ** ivy and counsel bundle
@@ -114,8 +116,14 @@ Tangle
   (use-package posframe)
   (use-package ivy-posframe
     :config
-    (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-point)))
-    (ivy-posframe-mode 1))
+    (setq ivy-posframe-display-functions-alist
+          '((swiper          . ivy-posframe-display-at-frame-center)
+            (swiper-isearch  . ivy-posframe-display-at-frame-center)
+            (complete-symbol . ivy-posframe-display-at-point)
+            (counsel-M-x     . ivy-posframe-display-at-point)
+            (t               . ivy-posframe-display)))
+    (ivy-posframe-mode 1)
+  )
 #+end_src
 ** Whichkey
 #+begin_src emacs-lisp
@@ -325,9 +333,36 @@ Tangle
     :config
     (global-undo-tree-mode))
 #+end_src
+** Deadgrep
+#+begin_src emacs-lisp 
+  (use-package deadgrep)
+#+end_src
+** Org-helm-rifle
+#+begin_src emacs-lisp :tangle yes
+  (use-package helm-org-rifle)
+  (defun hai/helm-org-rifle-archives ()
+    "Rifle through Archives folder"
+    (interactive)
+    (helm-org-rifle-directories "~/Dropbox/orggtd/"))
+#+end_src
+** Elfeed
+  #+begin_src emacs-lisp :tangle yes
+    (use-package elfeed
+      :config
+      (setq elfeed-feeds
+                '(("https://realpython.com/atom.xml" python)
+                  ("https://planetpython.org/rss20.xml" python planetpython)
+                  ("https://lukesmith.xyz/rss.xml" linux)
+                  ("https://planet.emacslife.com/atom.xml" emacs)
+                  ("https://rahmonov.me/feeds/atom.xml" python)
+                  ("https://blog.pythonanywhere.com/feed/" python)
+                  ("https://lucumr.pocoo.org/feed.atom" python)
+                  ("https://pbpython.com/feeds/all.atom.xml" python)
+                  )))
+  #+end_src
 * Aesthetic improvement
 ** Doom themes
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle yes
   (use-package doom-themes
     :config
     (setq doom-themes-enable-bold t
@@ -349,7 +384,7 @@ Tangle
  (use-package magit)
 #+END_SRC
 ** Python with elpy
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle no
   (use-package elpy
     :config
     (elpy-enable))
@@ -359,7 +394,7 @@ Tangle
   (use-package realgud)
 #+END_SRC
 ** Python with lsp mode
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle yes
   (use-package lsp-mode
     :commands lsp
     :hook (prog-mode . lsp))
@@ -382,10 +417,21 @@ Tangle
            (irony-mode-hook . irony-cdb-autosetup-compile-options)))
 #+end_src
 ** vterm
-#+begin_src emacs-lisp :tangle no
-
+#+begin_src emacs-lisp :tangle yes
   (use-package vterm)
-
+  (use-package vterm-toggle
+    :straight (vterm-toggle :type git :host github :repo "jixiuf/vterm-toggle")
+    :config
+    (setq vterm-toggle-fullscreen-p nil)
+    (add-to-list 'display-buffer-alist
+                 '("^v?term.*"
+                   (display-buffer-reuse-window display-buffer-at-bottom)
+                  ;;(display-buffer-reuse-window display-buffer-in-direction)
+                  ;;display-buffer-in-direction/direction/dedicated is added in emacs27
+                  ;;(direction . bottom)
+                  ;;(dedicated . t) ;dedicated is supported in emacs27
+                   (reusable-frames . visible)
+                   (window-height . 0.3))))
 #+end_src
 ** rustic - rust mode for emacs
 #+begin_src emacs-lisp :tangle yes
@@ -441,6 +487,8 @@ Tangle
    "H-p" 'org-previous-visible-heading
    "H-b" 'org-backward-heading-same-level
    "H-f" 'org-forward-heading-same-level
+   "H-o ." 'org-demote-subtree
+   "H-o ," 'org-promote-subtree
    )
 #+end_src
 ** Prefix commands
@@ -480,21 +528,25 @@ Tangle
    "l" 'hydra-lsp/body
    "a" 'hydra-apropos/body
    "t" 'hydra-transpose/body
+   "e" 'elfeed
+   "r" 'hai/helm-org-rifle-archives
    )
 #+end_src
 ** Non-prefix keybindings
 #+begin_src emacs-lisp
-    (general-define-key
-     :keymaps 'global
-     "H-," 'my-pop-local-mark-ring
-     "H-." 'unpop-to-mark-command
-     "H-<" 'previous-buffer
-     "H->" 'next-buffer
-     "M-<SPC>" 'set-mark-command
-     "C-z" 'undo-tree-undo
-     "C-S-z" 'undo-tree-redo
-     "C-s" 'swiper-isearch
-    )
+  (general-define-key
+   :keymaps 'global
+   "H-," 'my-pop-local-mark-ring
+   "H-." 'unpop-to-mark-command
+   "H-<" 'previous-buffer
+   "H->" 'next-buffer
+   "M-<SPC>" 'set-mark-command
+   "C-z" 'undo-tree-undo
+   "C-S-z" 'undo-tree-redo
+   "C-s" 'swiper-isearch
+   "H-t" 'vterm-toggle
+   "H-s" 'deadgrep
+  )
 #+end_src
 ** Smartparens
 #+begin_src emacs-lisp
@@ -505,7 +557,7 @@ Tangle
    "C-M-u" 'sp-unwrap-sexp)
 #+end_src
 * Helper functions
-#+begin_src emacs-lisp
+  #+begin_src emacs-lisp
   (defun my-pop-local-mark-ring ()
     (interactive)
     (set-mark-command t))
@@ -520,3 +572,4 @@ Tangle
           (setq mark-ring (nbutlast mark-ring))
           (goto-char (marker-position (car (last mark-ring))))))
 #+end_src
+
