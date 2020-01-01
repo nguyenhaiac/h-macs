@@ -64,6 +64,7 @@ Tangle
   (use-package gcmh
     :config
     (gcmh-mode 1))
+  (setq-default fringe-indicator-alist (assq-delete-all 'truncation fringe-indicator-alist))
   (use-package better-defaults)
   (global-hl-line-mode 1)
   (setq-default cursor-type 'bar)
@@ -436,7 +437,8 @@ Tangle
 *** Org-agenda config
 ** Org-super-agenda setting
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (setq org-agenda-files (list "~/Dropbox/orggtd/todo.org"))
+  (setq org-agenda-files (list "~/Dropbox/orggtd/todo.org"
+                               "~/Dropbox/orggtd/mobile.org"))
   (use-package org-super-agenda
     :defer t
     :config
@@ -461,24 +463,27 @@ Tangle
                                    )
                             (:discard (:anything t))
                             ))))
-          
+
             (alltodo "" ((org-agenda-overriding-header "Project Task")
                         (org-agenda-skip-function 'bh/skip-non-project-tasks)
                         (org-super-agenda-groups
-                         '((:name none
+                         '((:discard (:tag "REFILE"))
+                           (:name none
                                    :todo t
                                    :order 1)))))
 
             (alltodo "" ((org-agenda-overriding-header "Active Project")
                          (org-super-agenda-groups
-                          '((:name none
+                          '((:discard (:tag "REFILE"))
+                            (:name none
                                    :children "NEXT"
                                    :order 1)
                             (:discard (:anything t))))))
 
             (alltodo "" ((org-agenda-overriding-header "Next Task")
                          (org-super-agenda-groups
-                          '((:name none
+                          '((:discard (:tag "REFILE"))
+                            (:name none
                                    :discard (:not (:todo "NEXT"))
                                    :discard (:habit)
                                    :order 1)
@@ -499,7 +504,8 @@ Tangle
 
             (alltodo "" ((org-agenda-overriding-header "Stuck Project")
                          (org-super-agenda-groups
-                          '((:name none
+                          '((:discard (:tag "REFILE"))
+                            (:name none
                                    :discard (:children "NEXT")
                                    :order 1)
                             (:name none
@@ -523,12 +529,13 @@ Tangle
                  "* TODO %?\n%U\n%a\n" :clock-in t :clock-resume t)
                 ("n" "note" entry (file "~/Dropbox/orggtd/notes.org")
                  "* %? %^G :NOTE:\n%U\n%a\n" :clock-in t :clock-resume t)
-                ("w" "Web site" entry (file "~/Dropbox/orggtd/journal.org") "* %a :website:\n\n%U %?\n\n%:initial" :immediate-finish t)
+                ("w" "Web site" entry (file+headline "~/Dropbox/orggtd/todo.org" "Inbox")
+                 "* %a :website:\n\n%U %?\n\n%:initial" :immediate-finish t)
                 ("j" "Journal" entry (file+datetree "~/Dropbox/orggtd/journal.org")
                  "* %?\n%U\n" :clock-in t :clock-resume t)
                 ("m" "Meeting" entry (file "~/Dropbox/orggtd/todo.org")
                  "* MEETING with %? :MEETING:\n%U" :clock-in t :clock-resume t)
-                ("r" "Reading list" entry (file+headline "~/Dropbox/orggtd/todo.org" "TOREAD")
+                ("r" "Reading list" entry (file+headline "~/Dropbox/orggtd/todo.org" "ToRead")
                  "* TOREAD %?\n:PROPERTIES:\n:SERIES:\n:AUTHOR:\n:RATING:\n:ADDED:%U\n:END:")
                 ("p" "Phone call" entry (file "~/Dropbox/orggtd/todo.org")
                  "* PHONE %? :PHONE:\n%U" :clock-in t :clock-resume t)
@@ -537,7 +544,7 @@ Tangle
                  ))))
 #+END_SRC
 
-** Org-babel setting
+** Org-babel settingR
    #+begin_src emacs-lisp :tangle yes
           (org-babel-do-load-languages
            'org-babel-load-languages
