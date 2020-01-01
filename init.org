@@ -454,6 +454,14 @@ Tangle
                                   :order 2)
                            (:discard (:anything t))))))
 
+            (alltodo "" ((org-agenda-overriding-header "Refile")
+                         (org-super-agenda-groups
+                          '((:name none
+                                   :tag "REFILE"
+                                   )
+                            (:discard (:anything t))
+                            ))))
+          
             (alltodo "" ((org-agenda-overriding-header "Project Task")
                         (org-agenda-skip-function 'bh/skip-non-project-tasks)
                         (org-super-agenda-groups
@@ -479,21 +487,12 @@ Tangle
                                    :face (:background "" :underline t))
                             ))))
 
-            (alltodo "" ((org-agenda-overriding-header "Doing")
-                         (org-super-agenda-groups
-                          '((:name none
-                                   :discard (:not (:todo ("STRT")))
-                                   :discard (:habit)
-                                   :order 1)
-                            (:name none
-                                   :todo t
-                                   :face (:background "blue" :underline t))
-                            ))))
 
             (alltodo "" ((org-agenda-overriding-header "Standalone Task")
                          (org-agenda-skip-function 'bh/skip-project-tasks)
                          (org-super-agenda-groups
-                          '((:name none
+                          '((:discard (:tag "REFILE"))
+                            (:name none
                                    :todo ("TODO" "WAIT")
                                    :order 1)
                             (:discard (:anything t))))))
