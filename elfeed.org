@@ -1,0 +1,11 @@
+* Blogs                                                              :elfeed:
+** Python                                                            :python:
+*** https://realpython.com/atom.xml                                  
+*** https://planetpython.org/rss20.xml
+*** https://blog.pythonanywhere.com/feed/
+*** https://lucumr.pocoo.org/feed.atom
+*** https://pbpython.com/feeds/all.atom.xml
+** Emacs                                                             :emacs:
+*** https://planet.emacslife.com/atom.xml
+*** https://sachachua.com/blog/feed/
+*** https://karl-voit.at/feeds/lazyblorg-all.atom_1.0.links-only.xml
