@@ -20,6 +20,7 @@ Tangle and byte compile
                 (concat "init.org"))
      (org-babel-tangle)
      (byte-recompile-directory (expand-file-name user-emacs-directory) 0)))
+(add-hook 'after-save-hook #'my--tangle-byte-compile-org)
 #+END_SRC
 
 Tangle
@@ -60,6 +61,9 @@ Tangle
 
 ** Better-default 
 #+begin_src emacs-lisp
+  (use-package gcmh
+    :config
+    (gcmh-mode 1))
   (use-package better-defaults)
   (global-hl-line-mode 1)
   (setq-default cursor-type 'bar)
@@ -120,7 +124,8 @@ Tangle
           '((swiper          . ivy-posframe-display-at-frame-center)
             (swiper-isearch  . ivy-posframe-display-at-frame-center)
             (complete-symbol . ivy-posframe-display-at-point)
-            (counsel-M-x     . ivy-posframe-display-at-point)
+            (counsel-M-x     . ivy-posframe-display-at-frame-center)
+            (counsel-find-file     . ivy-posframe-display-at-frame-center)
             (t               . ivy-posframe-display)))
     (ivy-posframe-mode 1)
   )
@@ -327,7 +332,8 @@ Tangle
    ("U" undo nil)
    ("g" nil))
 #+end_src
-** Undo-fu
+** Undotree
+
 #+begin_src emacs-lisp
   (use-package undo-tree
     :config
@@ -345,36 +351,264 @@ Tangle
     (interactive)
     (helm-org-rifle-directories "~/Dropbox/orggtd/"))
 #+end_src
+** Org-webtools
+#+begin_src emacs-lisp
+  (use-package org-web-tools)
+#+end_src
 ** Elfeed
+*** Elfeed itself
   #+begin_src emacs-lisp :tangle yes
-    (use-package elfeed
-      :config
-      (setq elfeed-feeds
-                '(("https://realpython.com/atom.xml" python)
-                  ("https://planetpython.org/rss20.xml" python planetpython)
-                  ("https://lukesmith.xyz/rss.xml" linux)
-                  ("https://planet.emacslife.com/atom.xml" emacs)
-                  ("https://rahmonov.me/feeds/atom.xml" python)
-                  ("https://blog.pythonanywhere.com/feed/" python)
-                  ("https://lucumr.pocoo.org/feed.atom" python)
-                  ("https://pbpython.com/feeds/all.atom.xml" python)
-                  )))
+    (use-package elfeed)
   #+end_src
+*** Elfeed-org
+#+begin_src emacs-lisp
+  (use-package elfeed-org
+    :config
+    (elfeed-org)
+    (setq rmh-elfeed-org-files (list "~/.emacs.d/elfeed.org")))
+#+end_src
+** org-protocol-capture-html
+#+begin_src emacs-lisp
+  (require 'org-protocol)
+  (use-package org-protocol-capture-html
+    :straight (org-protocol-capture-html :type git :host github :repo "alphapapa/org-protocol-capture-html"))
+#+end_src
+* Orgmode setup
+** General setup
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (add-hook 'org-mode-hook 'org-indent-mode)
+  (setq org-refile-use-outline-path 'file)
+  (setq org-use-fast-todo-selection t)
+  (setq org-treat-S-cursor-todo-selection-as-state-change nil)
+  (setq org-agenda-time-grid
+        (quote
+         ((daily today remove-match)
+          (900 1100 1300 1500 1700)
+          "......" "----------------")))
+  (setq org-outline-path-complete-in-steps nil)
+  (setq org-refile-allow-creating-parent-nodes 'confirm)
+  (setq org-refile-targets '((org-agenda-files :maxlevel . 3)))
+
+#+END_SRC
+** Agenda setup
+#+BEGIN_SRC emacs-lisp :tangle yes
+(require 'org-habit)
+(setq spacemacs-theme-org-agenda-height nil
+      org-agenda-start-day "-1d"
+      org-agenda-skip-scheduled-if-done t
+      org-agenda-skip-deadline-if-done t
+      org-agenda-include-deadlines t
+      org-agenda-include-diary t
+      org-agenda-block-separator nil
+      org-agenda-compact-blocks t
+      org-agenda-start-with-log-mode t)
+#+END_SRC
+*** Habit and clocking
+#+BEGIN_SRC emacs-lisp :tangle yes
+(setq  org-habit-following-days 7
+       org-habit-preceding-days 10
+       org-habit-show-habits-only-for-today t)
+(setq org-agenda-tags-column -102)
+(setq org-habit-graph-column 50)
+(setq org-clock-out-remove-zero-time-clocks t)
+(setq org-clock-out-when-done t)
+(setq org-clock-persist t)
+#+END_SRC
+** Org-todo-keywords
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (custom-declare-face '+org-todo-active '((t (:inherit (bold font-lock-constant-face org-todo)))) "")
+  (custom-declare-face '+org-todo-project '((t (:inherit (bold font-lock-doc-face org-todo)))) "")
+  (custom-declare-face '+org-todo-onhold '((t (:inherit (bold warning org-todo)))) "")
+  (setq org-todo-keywords
+        '((sequence
+           "TODO(t)"  ; A task that needs doing & is ready to do
+           "NEXT(n)"
+           "STRT(s)"  ; A task that is in progress
+           "WAIT(w)"  ; Something is holding up this task; or it is paused
+           "TOREAD(r)"
+           "|"
+           "DONE(d)"  ; Task successfully completed
+           "PHONE(p)"
+           "READ(R)"
+           "MEETING(m)"
+           "KILL(k)")))
+#+END_SRC
+*** Org-agenda config
+** Org-super-agenda setting
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (setq org-agenda-files (list "~/Dropbox/orggtd/todo.org"))
+  (use-package org-super-agenda
+    :defer t
+    :config
+    (org-super-agenda-mode))
+  (setq org-agenda-custom-commands
+        '(("z" "Super zaen view"
+           ((agenda "" ((org-agenda-span 3)
+                        (org-super-agenda-groups
+                         '((:name "Habit"
+                                  :habit t)
+
+                           (:name "Schedule"
+                                  :time-grid t
+                                  :scheduled t
+                                  :order 2)
+                           (:discard (:anything t))))))
+
+            (alltodo "" ((org-agenda-overriding-header "Project Task")
+                        (org-agenda-skip-function 'bh/skip-non-project-tasks)
+                        (org-super-agenda-groups
+                         '((:name none
+                                   :todo t
+                                   :order 1)))))
+
+            (alltodo "" ((org-agenda-overriding-header "Active Project")
+                         (org-super-agenda-groups
+                          '((:name none
+                                   :children "NEXT"
+                                   :order 1)
+                            (:discard (:anything t))))))
+
+            (alltodo "" ((org-agenda-overriding-header "Next Task")
+                         (org-super-agenda-groups
+                          '((:name none
+                                   :discard (:not (:todo "NEXT"))
+                                   :discard (:habit)
+                                   :order 1)
+                            (:name none
+                                   :todo "NEXT"
+                                   :face (:background "" :underline t))
+                            ))))
+
+            (alltodo "" ((org-agenda-overriding-header "Doing")
+                         (org-super-agenda-groups
+                          '((:name none
+                                   :discard (:not (:todo ("STRT")))
+                                   :discard (:habit)
+                                   :order 1)
+                            (:name none
+                                   :todo t
+                                   :face (:background "blue" :underline t))
+                            ))))
+
+            (alltodo "" ((org-agenda-overriding-header "Standalone Task")
+                         (org-agenda-skip-function 'bh/skip-project-tasks)
+                         (org-super-agenda-groups
+                          '((:name none
+                                   :todo ("TODO" "WAIT")
+                                   :order 1)
+                            (:discard (:anything t))))))
+
+            (alltodo "" ((org-agenda-overriding-header "Stuck Project")
+                         (org-super-agenda-groups
+                          '((:name none
+                                   :discard (:children "NEXT")
+                                   :order 1)
+                            (:name none
+                                   :discard (:children nil)
+                                   :order 1)
+                            (:name none
+                                   :children todo)))))
+            ))
+          ("b" "books" alltodo "" ((org-agenda-overriding-header "Books to read")
+                                (org-super-agenda-groups
+                                 '((:name none
+                                          :todo "TOREAD")
+                                   (:discard (:anything t))))))
+          ))
+#+END_SRC
+** Org-capture
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (setq org-capture-templates
+        (quote (("t" "todo" entry (file+headline "~/Dropbox/orggtd/todo.org" "Inbox")
+                 "* TODO %?\n%U\n%a\n" :clock-in t :clock-resume t)
+                ("n" "note" entry (file "~/Dropbox/orggtd/notes.org")
+                 "* %? %^G :NOTE:\n%U\n%a\n" :clock-in t :clock-resume t)
+                ("w" "Web site" entry (file "~/Dropbox/orggtd/journal.org") "* %a :website:\n\n%U %?\n\n%:initial" :immediate-finish t)
+                ("j" "Journal" entry (file+datetree "~/Dropbox/orggtd/journal.org")
+                 "* %?\n%U\n" :clock-in t :clock-resume t)
+                ("m" "Meeting" entry (file "~/Dropbox/orggtd/todo.org")
+                 "* MEETING with %? :MEETING:\n%U" :clock-in t :clock-resume t)
+                ("r" "Reading list" entry (file+headline "~/Dropbox/orggtd/todo.org" "TOREAD")
+                 "* TOREAD %?\n:PROPERTIES:\n:SERIES:\n:AUTHOR:\n:RATING:\n:ADDED:%U\n:END:")
+                ("p" "Phone call" entry (file "~/Dropbox/orggtd/todo.org")
+                 "* PHONE %? :PHONE:\n%U" :clock-in t :clock-resume t)
+                ("h" "Habit" entry (file "~/Dropbox/orggtd/todo.org")
+                 "* NEXT %?\nSCHEDULED: <%<%Y-%m-%d %a .+1d>>\n:PROPERTIES:\n:CREATED: %U\n:STYLE: habit\n:REPEAT_TO_STATE: NEXT\n:LOGGING: DONE(!)\n:ARCHIVE: %%s_archive::* Habits\n:END:\n%U\n"
+                 ))))
+#+END_SRC
+
+** Org-babel setting
+   #+begin_src emacs-lisp :tangle yes
+          (org-babel-do-load-languages
+           'org-babel-load-languages
+           '((ruby . t)
+             (dot . t)
+             (groovy . t)
+             (shell . t)
+             (python . t)
+             (emacs-lisp . t)
+             (matlab . t)
+             (latex . t)
+             (C . t)
+             (J . t)
+             (java . t)
+             (scheme . t)
+             (lisp . t)
+             (latex . t)
+             (R . t)
+             (sql . t)
+             (calc . t)))
+
+          (eval-when-compile
+            (require 'ob-C)
+            (require 'ob-ruby)
+            (require 'ob-python)
+            (require 'ob-scheme)
+            (require 'ob-clojure))
+          (setq org-confirm-babel-evaluate nil)
+   #+end_src
+
+   #+RESULTS:
+
+*** Org babel header
+    #+begin_src emacs-lisp :tangle yes
+      ;;* Python
+      (setq org-babel-default-header-args:python
+	    '((:results . "output")))
+      (setq org-babel-python-command "python3")
+
+      ;;* Bash
+      (setq org-babel-default-header-args:sh
+	    '((:results . "verbatim")))
+      (setq org-babel-default-header-args:bash
+	    '((:results . "verbatim")))
+
+      (setq org-babel-default-header-args:C
+	    '((:results . "org")
+	      (:exports . "both")))
+    #+end_src
 * Aesthetic improvement
 ** Doom themes
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle no
   (use-package doom-themes
     :config
     (setq doom-themes-enable-bold t
           doom-themes-enable-italic t)
     (load-theme 'doom-one t))
 #+end_src
+** kaolin themes
+#+begin_src emacs-lisp
+  (use-package kaolin-themes
+    :config
+    (load-theme 'kaolin-valley-light t))
+#+end_src
 ** Smart-mode-line
 #+begin_src emacs-lisp
   (use-package smart-mode-line-atom-one-dark-theme)
   (use-package smart-mode-line
     :config
-    (setq sml/theme 'atom-one-dark)
+    (setq sml/theme 'respectful)
     (sml/setup)
     (add-to-list 'sml/replacer-regexp-list '("^~/Dropbox/" ":DBox:")))
 #+end_src
@@ -426,10 +660,6 @@ Tangle
     (add-to-list 'display-buffer-alist
                  '("^v?term.*"
                    (display-buffer-reuse-window display-buffer-at-bottom)
-                  ;;(display-buffer-reuse-window display-buffer-in-direction)
-                  ;;display-buffer-in-direction/direction/dedicated is added in emacs27
-                  ;;(direction . bottom)
-                  ;;(dedicated . t) ;dedicated is supported in emacs27
                    (reusable-frames . visible)
                    (window-height . 0.3))))
 #+end_src
@@ -551,12 +781,15 @@ Tangle
 ** Smartparens
 #+begin_src emacs-lisp
   (general-define-key
-   :keymaps 'smartparens-mode-map
-   "C-M-f" 'sp-forward-sexp
-   "C-M-b" 'sp-backward-sexp
-   "C-M-u" 'sp-unwrap-sexp)
+   :keymap 'global
+   "C-M-'" 'negative-argument)
+  (sp-pair "(" ")" :wrap "H-(")
+  (sp-pair "[" "]" :wrap "H-[")
+  (sp-pair "{" "}" :wrap "H-{")
+
 #+end_src
 * Helper functions
+** Save and navigate back and forth when save
   #+begin_src emacs-lisp
   (defun my-pop-local-mark-ring ()
     (interactive)
@@ -572,4 +805,110 @@ Tangle
           (setq mark-ring (nbutlast mark-ring))
           (goto-char (marker-position (car (last mark-ring))))))
 #+end_src
+** Org-mode helper function
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+(defun bh/is-project-p ()
+  "Any task with a todo keyword subtask"
+  (save-restriction
+    (widen)
+    (let ((has-subtask)
+          (subtree-end (save-excursion (org-end-of-subtree t)))
+          (is-a-task (member (nth 2 (org-heading-components)) org-todo-keywords-1)))
+      (save-excursion
+        (forward-line 1)
+        (while (and (not has-subtask)
+                    (< (point) subtree-end)
+                    (re-search-forward "^\*+ " subtree-end t))
+          (when (member (org-get-todo-state) org-todo-keywords-1)
+            (setq has-subtask t))))
+      (and is-a-task has-subtask))))
+
+(defun bh/find-project-task ()
+  "Move point to the parent (project) task if any"
+  (save-restriction
+    (widen)
+    (let ((parent-task (save-excursion (org-back-to-heading 'invisible-ok) (point))))
+      (while (org-up-heading-safe)
+        (when (member (nth 2 (org-heading-components)) org-todo-keywords-1)
+          (setq parent-task (point))))
+      (goto-char parent-task)
+      parent-task)))
+
+(defun bh/skip-non-tasks ()
+  "Show non-project tasks.
+Skip project and sub-project tasks, habits, and project related tasks."
+  (save-restriction
+    (widen)
+    (let ((next-headline (save-excursion (or (outline-next-heading) (point-max)))))
+      (cond
+       ((bh/is-task-p)
+        nil)
+       (t
+        next-headline)))))
+
+(defun bh/skip-project-tasks ()
+  "Show non-project tasks.
+Skip project and sub-project tasks, habits, and project related tasks."
+  (save-restriction
+    (widen)
+    (let* ((subtree-end (save-excursion (org-end-of-subtree t))))
+      (cond
+       ((bh/is-project-p)
+        subtree-end)
+       ((org-is-habit-p)
+        subtree-end)
+       ((bh/is-project-subtree-p)
+        subtree-end)
+       (t
+        nil)))))
+
+(defun bh/is-task-p ()
+  "Any task with a todo keyword and no subtask"
+  (save-restriction
+    (widen)
+    (let ((has-subtask)
+          (subtree-end (save-excursion (org-end-of-subtree t)))
+          (is-a-task (member (nth 2 (org-heading-components)) org-todo-keywords-1)))
+      (save-excursion
+        (forward-line 1)
+        (while (and (not has-subtask)
+                    (< (point) subtree-end)
+                    (re-search-forward "^\*+ " subtree-end t))
+          (when (member (org-get-todo-state) org-todo-keywords-1)
+            (setq has-subtask t))))
+      (and is-a-task (not has-subtask)))))
+
+(defun bh/is-project-subtree-p ()
+  "Any task with a todo keyword that is in a project subtree.
+Callers of this function already widen the buffer view."
+  (let ((task (save-excursion (org-back-to-heading 'invisible-ok)
+                              (point))))
+    (save-excursion
+      (bh/find-project-task)
+      (if (equal (point) task)
+          nil
+        t))))
+
+
+(defun bh/skip-non-project-tasks ()
+  "Show project tasks.
+Skip project and sub-project tasks, habits, and loose non-project tasks."
+  (save-restriction
+    (widen)
+    (let* ((subtree-end (save-excursion (org-end-of-subtree t)))
+           (next-headline (save-excursion (or (outline-next-heading) (point-max)))))
+      (cond
+       ((bh/is-project-p)
+        next-headline)
+       ((org-is-habit-p)
+        subtree-end)
+       ((and (bh/is-project-subtree-p)
+             (member (org-get-todo-state) (list "NEXT")))
+        subtree-end)
+       ((not (bh/is-project-subtree-p))
+        subtree-end)
+       (t
+        nil)))))
+#+END_SRC
 
