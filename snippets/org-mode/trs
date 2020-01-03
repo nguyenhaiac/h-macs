@@ -1,0 +1,17 @@
+# -*- mode: snippet -*-
+# name: trs
+# key: trs
+# --
+* ${0:20000}                                                                
+:PROPERTIES:
+:MVA:        ${1:MVA}
+:HV:         ${2:HV}
+:Tapping:    ${3:Tapping range}
+:LV:         ${4:LV}
+:TV:         ${5:TV}
+:Vector:     ${6:Vector Group}
+:Tapchanger: ${7:OLTC}
+:Cooling:    ${8:ONAN/ONAF}
+:END:
+
+

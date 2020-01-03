@@ -372,6 +372,14 @@ Tangle
     (elfeed-org)
     (setq rmh-elfeed-org-files (list "~/.emacs.d/elfeed.org")))
 #+end_src
+** Yasnippet
+#+begin_src emacs-lisp
+  (use-package yasnippet
+    :config
+    (yas-global-mode 1)
+    (setq yas-snippet-dirs
+          '("~/.emacs.d/snippets/")))
+#+end_src
 ** org-protocol-capture-html
 #+begin_src emacs-lisp
   (require 'org-protocol)
@@ -923,3 +931,25 @@ Skip project and sub-project tasks, habits, and loose non-project tasks."
         nil)))))
 #+END_SRC
 
+** Convert Transformer task to Design name
+#+begin_src emacs-lisp
+  (defun print-prop ()
+    (let* ((props (org-entry-properties))
+           (tap (cdr (assoc '"TAPCHANGER" props)))
+           (mva (cdr (assoc '"MVA" props)))
+           (hv (cdr (assoc '"HV" props)))
+           (lv (cdr (assoc '"LV" props)))
+           (tv (cdr (assoc '"TV" props)))
+           (tapping (cdr (assoc '"TAPPING" props)))
+           (name (cdr (assoc '"ITEM" props)))
+           (vector (cdr (assoc '"VECTOR" props)))
+           (cooling (cdr (assoc '"COOLING" props)))
+           (str (concat "VT" name "-" hv " " tapping
+                        "-" lv
+                        "-" tv
+                        "-" vector
+                        "-" tap
+                        "-" cooling)))
+      (insert str)
+    ))
+#+end_src
