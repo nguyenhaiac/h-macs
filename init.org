@@ -36,10 +36,6 @@ Tangle
      (org-babel-tangle)))
 (add-hook 'after-save-hook #'my--tangle-org)
 #+END_SRC
-
-#+RESULTS:
-| rmail-after-save-hook | my--tangle-org | my--tangle-byte-compile-org |
-
 ** Bootstrap straight.el
 *** Install straight.el if not yet
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -400,7 +396,7 @@ Tangle
           "......" "----------------")))
   (setq org-outline-path-complete-in-steps nil)
   (setq org-refile-allow-creating-parent-nodes 'confirm)
-  (setq org-refile-targets '((org-agenda-files :maxlevel . 3)))
+  (setq org-refile-targets '((org-refile-files :maxlevel . 3)))
 
 #+END_SRC
 ** Agenda setup
@@ -451,9 +447,13 @@ Tangle
 #+BEGIN_SRC emacs-lisp :tangle yes
   (setq org-agenda-files (list "~/Dropbox/orggtd/todo.org"
                                "~/Dropbox/orggtd/mobile.org"
-                               "~/OneDrive - ABB/tender.org"))
+                               "~/Onedrive - ABB/tender.org"))
+  (setq org-refile-files (list "~/Dropbox/orggtd/todo.org"
+                               "~/Dropbox/orggtd/mobile.org"
+                               "~/Onedrive - ABB/tender.org"
+                               "~/Dropbox/orggtd/someday.org"
+                               "~/Dropbox/orggtd/references.org"))
   (use-package org-super-agenda
-    :defer t
     :config
     (org-super-agenda-mode))
   (setq org-agenda-custom-commands
