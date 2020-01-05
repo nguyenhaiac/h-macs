@@ -13,17 +13,15 @@
 Tangle and byte compile
 
 #+BEGIN_SRC emacs-lisp :tangle yes
-(defun my--tangle-byte-compile-org ()
- "Tangles emacs.org and byte compiles ~/.emacs.d/"
-   (interactive)
-   (when (equal (buffer-name)
-                (concat "init.org"))
-     (org-babel-tangle)
-     (byte-recompile-directory (expand-file-name user-emacs-directory) 0)))
+  (defun my--tangle-byte-compile-org ()
+   "Tangles emacs.org and byte compiles ~/.emacs.d/"
+     (interactive)
+     (when (equal (buffer-name)
+                  (concat "init.org"))
+       (org-babel-tangle)
+       (byte-recompile-directory (expand-file-name user-emacs-directory) 0)))
+  (add-hook 'after-save-hook #'my--tangle-byte-compile-org)
 #+END_SRC
-
-#+RESULTS:
-: my--tangle-byte-compile-org
 
 Tangle
 
@@ -35,6 +33,7 @@ Tangle
                 (concat "init.org"))
      (org-babel-tangle)))
 (add-hook 'after-save-hook #'my--tangle-org)
+
 #+END_SRC
 ** Bootstrap straight.el
 *** Install straight.el if not yet
@@ -458,7 +457,7 @@ Tangle
     (org-super-agenda-mode))
   (setq org-agenda-custom-commands
         '(("z" "Super zaen view"
-           ((agenda "" ((org-agenda-span 10)
+           ((agenda "" ((org-agenda-span 5)
                         (org-super-agenda-groups
                          '((:name "Habit"
                                   :habit t)
@@ -484,7 +483,15 @@ Tangle
                            (:name none
                                    :todo t
                                    :order 1)))))
-
+          
+            (alltodo "" ((org-agenda-overriding-header "STARTED")
+                        (org-agenda-skip-function 'bh/skip-non-project-tasks)
+                        (org-super-agenda-groups
+                         '((:discard (:tag "REFILE"))
+                           (:name none
+                                   :todo (:tag ("STRT"))
+                                   :order 1)))))
+          
             (alltodo "" ((org-agenda-overriding-header "Active Project")
                          (org-super-agenda-groups
                           '((:discard (:tag "REFILE"))
@@ -557,7 +564,7 @@ Tangle
                  ))))
 #+END_SRC
 
-** Org-babel settingR
+** Org-babel setting
    #+begin_src emacs-lisp :tangle yes
           (org-babel-do-load-languages
            'org-babel-load-languages
@@ -637,7 +644,7 @@ Tangle
  (use-package magit)
 #+END_SRC
 ** Python with elpy
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle yes
   (use-package elpy
     :config
     (elpy-enable))
@@ -647,11 +654,10 @@ Tangle
   (use-package realgud)
 #+END_SRC
 ** Python with lsp mode
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle no
   (use-package lsp-mode
     :commands lsp
-    :hook (prog-mode . lsp))
-  (use-package company-lsp :commands company-lsp)
+   (use-package company-lsp :commands company-lsp)
   (use-package helm-lsp :commands helm-lsp-workspace-symbol)
 #+end_src
 ** pyvenv
