@@ -94,10 +94,7 @@ Tangle
     (setq ivy-use-virtual-buffers t)
     (setq ivy-count-format "(%d/%d) ")
     (setq enable-recursive-minibuffers t)
-    (setq ivy-initial-inputs-alist nil)
-    (setq ivy-re-builders-alist
-    '((swiper . ivy--regex-plus)
-     (t      . ivy--regex-fuzzy))))
+    (setq ivy-initial-inputs-alist nil) )
   (use-package counsel
     :diminish counsel-mode
     :config
@@ -381,6 +378,12 @@ Tangle
   (use-package org-protocol-capture-html
     :straight (org-protocol-capture-html :type git :host github :repo "alphapapa/org-protocol-capture-html"))
 #+end_src
+** pdf-tools
+#+begin_src emacs-lisp
+  (use-package pdf-tools
+    :config
+    (pdf-tools-install))
+#+end_src
 * Orgmode setup
 ** General setup
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -398,6 +401,10 @@ Tangle
   (setq org-refile-targets '((org-refile-files :maxlevel . 3)))
 
 #+END_SRC
+** Org-noter
+#+begin_src emacs-lisp
+  (use-package org-noter)
+#+end_src
 ** Agenda setup
 #+BEGIN_SRC emacs-lisp :tangle yes
 (require 'org-habit)
@@ -483,15 +490,15 @@ Tangle
                            (:name none
                                    :todo t
                                    :order 1)))))
-          
+
             (alltodo "" ((org-agenda-overriding-header "STARTED")
                         (org-agenda-skip-function 'bh/skip-non-project-tasks)
                         (org-super-agenda-groups
                          '((:discard (:tag "REFILE"))
                            (:name none
-                                   :todo (:tag ("STRT"))
+                                   :todo "STRT"
                                    :order 1)))))
-          
+
             (alltodo "" ((org-agenda-overriding-header "Active Project")
                          (org-super-agenda-groups
                           '((:discard (:tag "REFILE"))
@@ -810,7 +817,7 @@ Tangle
    "C-M-'" 'negative-argument)
   (sp-pair "(" ")" :wrap "H-(")
   (sp-pair "[" "]" :wrap "H-[")
-  (sp-pair "{" "}" :wrap "H-{")
+  (sp-pair "{" "}" :wrap "H-{") 
 
 #+end_src
 * Helper functions
@@ -958,4 +965,11 @@ Skip project and sub-project tasks, habits, and loose non-project tasks."
                         "-" cooling)))
       (insert str)
     ))
+#+end_src
+** Find book and open it with org noter 
+#+begin_src emacs-lisp
+  (defun my-findbook-counsel-fzf ()
+      (interactive)
+    (let ((counsel-fzf-cmd "find ~/Dropbox/Calibre | grep -E \"(*.pdf)\" | fzf -f \"%s\" "))
+    (counsel-fzf)))
 #+end_src
