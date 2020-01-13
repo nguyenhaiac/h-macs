@@ -9,3 +9,13 @@
 *** https://planet.emacslife.com/atom.xml
 *** https://sachachua.com/blog/feed/
 *** https://karl-voit.at/feeds/lazyblorg-all.atom_1.0.links-only.xml
+*** http://pragmaticemacs.com/feed/
+*** https://irreal.org/blog/?feed=rss2
+*** http://emacsblog.org/feed/
+*** https://cpbotha.net/posts/index.xml
+*** https://emacsredux.com/feed.xml
+** Linux
+*** https://itsfoss.com/feed/
+*** https://www.tecmint.com/feed/
+*** https://linoxide.com/feed/
+

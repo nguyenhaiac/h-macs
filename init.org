@@ -551,6 +551,7 @@ Tangle
 ** Org-capture
 
 #+BEGIN_SRC emacs-lisp :tangle yes
+  (setq org-protocol-capture-html-pandoc-no-wrap-option "--wrap=auto")
   (setq org-capture-templates
         (quote (("t" "todo" entry (file+headline "~/Dropbox/orggtd/todo.org" "Inbox")
                  "* TODO %?\n%U\n%a\n" :clock-in t :clock-resume t)
@@ -818,7 +819,6 @@ Tangle
   (sp-pair "(" ")" :wrap "H-(")
   (sp-pair "[" "]" :wrap "H-[")
   (sp-pair "{" "}" :wrap "H-{") 
-
 #+end_src
 * Helper functions
 ** Save and navigate back and forth when save
