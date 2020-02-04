@@ -389,15 +389,9 @@ Tangle
   (use-package org-brain :ensure t
     :init
     (setq org-brain-path "~/Dropbox/brain")
-    ;; For Evil users
-    (with-eval-after-load 'evil
-      (evil-set-initial-state 'org-brain-visualize-mode 'emacs))
     :config
     (setq org-id-track-globally t)
     (setq org-id-locations-file "~/.emacs.d/.org-id-locations")
-    (push '("b" "Brain" plain (function org-brain-goto-end)
-            "* %i%?" :empty-lines 1)
-          org-capture-templates)
     (setq org-brain-visualize-default-choices 'all)
     (setq org-brain-title-max-length 12)
     (setq org-brain-include-file-entries nil
@@ -450,9 +444,6 @@ Tangle
 #+END_SRC
 ** Org-todo-keywords
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (custom-declare-face '+org-todo-active '((t (:inherit (bold font-lock-constant-face org-todo)))) "")
-  (custom-declare-face '+org-todo-project '((t (:inherit (bold font-lock-doc-face org-todo)))) "")
-  (custom-declare-face '+org-todo-onhold '((t (:inherit (bold warning org-todo)))) "")
   (setq org-todo-keywords
         '((sequence
            "TODO(t)"  ; A task that needs doing & is ready to do
@@ -468,107 +459,6 @@ Tangle
            "KILL(k)")))
 #+END_SRC
 *** Org-agenda config
-** Org-super-agenda setting
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (setq org-agenda-files (list "~/Dropbox/orggtd/todo.org"
-                               "~/Dropbox/orggtd/mobile.org"
-                               "~/Onedrive - ABB/tender.org"))
-  (setq org-refile-files (list "~/Dropbox/orggtd/todo.org"
-                               "~/Dropbox/orggtd/mobile.org"
-                               "~/Onedrive - ABB/tender.org"
-                               "~/Dropbox/orggtd/someday.org"
-                               "~/Dropbox/orggtd/references.org"))
-  (use-package org-super-agenda
-    :config
-    (org-super-agenda-mode))
-  (setq org-agenda-custom-commands
-        '(("z" "Super zaen view"
-           ((agenda "" ((org-agenda-span 5)
-                        (org-super-agenda-groups
-                         '((:name "Habit"
-                                  :habit t)
-
-                           (:name "Schedule"
-                                  :time-grid t
-                                  :scheduled t
-                                  :order 2)
-                           (:discard (:anything t))))))
-
-            (alltodo "" ((org-agenda-overriding-header "Refile")
-                         (org-super-agenda-groups
-                          '((:name none
-                                   :tag "REFILE"
-                                   )
-                            (:discard (:anything t))
-                            ))))
-
-            (alltodo "" ((org-agenda-overriding-header "Project Task")
-                        (org-agenda-skip-function 'bh/skip-non-project-tasks)
-                        (org-super-agenda-groups
-                         '((:discard (:tag "REFILE"))
-                           (:name none
-                                   :todo t
-                                   :order 1)))))
-
-            (alltodo "" ((org-agenda-overriding-header "STARTED")
-                        (org-agenda-skip-function 'bh/skip-non-project-tasks)
-                        (org-super-agenda-groups
-                         '((:discard (:tag "REFILE"))
-                           (:name none
-                                   :todo "STRT"
-                                   :order 1)
-                           (:discard (:anything t))))))
-
-            (alltodo "" ((org-agenda-overriding-header "Active Project")
-                         (org-super-agenda-groups
-                          '((:discard (:tag "REFILE"))
-                            (:name none
-                                   :children "NEXT"
-                                   :order 1)
-                            (:discard (:anything t))))))
-
-            (alltodo "" ((org-agenda-overriding-header "Next Task")
-                         (org-super-agenda-groups
-                          '((:discard (:tag "REFILE"))
-                            (:name none
-                                   :discard (:not (:todo "NEXT"))
-                                   :discard (:habit)
-                                   :order 1)
-                            (:name none
-                                   :todo "NEXT"
-                                   :face (:background "" :underline t))
-                            ))))
-
-
-            (alltodo "" ((org-agenda-overriding-header "Standalone Task")
-                         (org-agenda-skip-function 'bh/skip-project-tasks)
-                         (org-super-agenda-groups
-                          '((:discard (:tag "REFILE"))
-                            (:name none
-                                   :todo ("TODO" "WAIT")
-                                   :order 1)
-                            (:discard (:anything t))))))
-
-            (alltodo "" ((org-agenda-overriding-header "Stuck Project")
-                         (org-super-agenda-groups
-                          '((:discard (:tag "REFILE"))
-                            (:name none
-                                   :discard (:children "NEXT")
-                                   :order 1)
-                            (:name none
-                                   :discard (:children nil)
-                                   :order 1)
-                            (:name none
-                                   :children todo)
-                            (:discard (:anything t))))))
-            ))
-          ("b" "books" alltodo "" ((org-agenda-overriding-header "Books to read")
-                                (org-super-agenda-groups
-                                 '((:name none
-                                          :todo "TOREAD")
-                                   (:discard (:anything t))))))
-          ))
-#+END_SRC
 ** Org-capture
 
 #+BEGIN_SRC emacs-lisp :tangle yes
