@@ -60,6 +60,8 @@ Tangle
 
 ** Better-default 
 #+begin_src emacs-lisp
+  (setq w32-pass-apps-to-system nil)
+  (setq w32-apps-modifier 'hyper) ; Menu/App key
   (use-package gcmh
     :config
     (gcmh-mode 1))
@@ -82,7 +84,6 @@ Tangle
    custom-safe-themes t
    confirm-kill-emacs 'y-or-n-p      ; y and n instead of yes and no when quitting
    )
-  (modify-syntax-entry ?_ "w")
 #+end_src
 * Utilities setup
 ** ivy and counsel bundle
@@ -383,6 +384,42 @@ Tangle
   (use-package pdf-tools
     :config
     (pdf-tools-install))
+#+end_src
+** evil-mode
+#+begin_src emacs-lisp
+  (use-package evil
+    :config
+    (evil-mode 1)
+    (evil-set-initial-state 'org-agenda 'emacs)
+    (evil-set-initial-state 'dired-mode 'emacs))
+#+end_src
+** Evil support packages
+#+begin_src emacs-lisp
+  (use-package evil-anzu
+    :after evil
+    :init
+    (global-anzu-mode t)
+    (setq anzu-search-threshold 1000
+          anzu-cons-mode-line-p nil))
+  (use-package evil-numbers
+    :after evil
+    :config
+    (define-key evil-normal-state-map (kbd "C-a") 'evil-numbers/inc-at-pt)
+    (define-key evil-normal-state-map (kbd "C-e") 'evil-numbers/dec-at-pt))
+  (use-package evil-surround
+    :after evil)
+  (use-package evil-matchit
+    :after evil)
+  (use-package evil-nerd-commenter
+    :after evil)
+  (use-package evil-lisp-state
+    :after evil)
+  (use-package evil-goggles
+    :config
+    (evil-goggles-mode))
+  (use-package evil-lion
+    :config
+    (evil-lion-mode))
 #+end_src
 ** org-brain
 #+begin_src emacs-lisp
