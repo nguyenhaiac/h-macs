@@ -414,9 +414,6 @@ Tangle
     :after evil)
   (use-package evil-lisp-state
     :after evil)
-  (use-package evil-goggles
-    :config
-    (evil-goggles-mode))
   (use-package evil-lion
     :config
     (evil-lion-mode))
@@ -767,6 +764,47 @@ Tangle
   (sp-pair "(" ")" :wrap "H-(")
   (sp-pair "[" "]" :wrap "H-[")
   (sp-pair "{" "}" :wrap "H-{") 
+#+end_src
+** Leader keybindings
+*** Define leader key
+#+begin_src emacs-lisp
+  (general-create-definer my-leader-def
+    :prefix "SPC")
+  (general-create-definer my-local-leader-def
+    :prefix ",")
+#+end_src
+*** Global
+#+begin_src emacs-lisp
+  (my-leader-def 'normal
+   "SPC" 'counsel-M-x
+   "f" '(:ignore t :which-key "file prefix")
+   "ff" 'counsel-find-file
+   "s" 'save-buffer
+   )
+#+end_src
+*** Local
+**** Org-mode
+#+begin_src emacs-lisp
+  (my-local-leader-def
+    :states 'normal
+    :keymaps 'org-mode-map
+    "y" 'org-store-link
+    "p" 'org-insert-link
+    )
+#+end_src
+**** Org-capture
+#+begin_src emacs-lisp
+  (general-define-key
+   :keymaps 'org-capture-mode-map
+   [remap evil-save-and-close]          'org-capture-finalize
+   [remap evil-save-modified-and-close] 'org-capture-finalize
+   [remap evil-quit]                    'org-capture-kill)
+
+  (general-define-key
+   :states 'normal
+   :keymaps 'org-capture-mode-map
+   "RET" "C-c C-c"
+   "SPC k" '(org-capture-kill :which-key "abort capture"))
 #+end_src
 * Helper functions
 ** Save and navigate back and forth when save
