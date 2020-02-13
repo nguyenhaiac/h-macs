@@ -569,7 +569,7 @@ Tangle
     #+end_src
 * Aesthetic improvement
 ** Doom themes
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle yes
   (use-package doom-themes
     :config
     (setq doom-themes-enable-bold t
@@ -577,7 +577,7 @@ Tangle
     (load-theme 'doom-one t))
 #+end_src
 ** kaolin themes
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
   (use-package kaolin-themes
     :config
     (load-theme 'kaolin-valley-light t))
@@ -597,7 +597,7 @@ Tangle
  (use-package magit)
 #+END_SRC
 ** Python with elpy
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle no
   (use-package elpy
     :config
     (elpy-enable))
@@ -607,10 +607,10 @@ Tangle
   (use-package realgud)
 #+END_SRC
 ** Python with lsp mode
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle yes
   (use-package lsp-mode
-    :commands lsp
-   (use-package company-lsp :commands company-lsp)
+    :commands lsp)
+  (use-package company-lsp :commands company-lsp)
   (use-package helm-lsp :commands helm-lsp-workspace-symbol)
 #+end_src
 ** pyvenv
@@ -780,16 +780,28 @@ Tangle
    "f" '(:ignore t :which-key "file prefix")
    "ff" 'counsel-find-file
    "s" 'save-buffer
-   )
+   "b" '(:ignore t :which-key "buffer prefix")
+   "bb" 'switch-to-buffer
+   "bi" 'ibuffer
+   "r" '(:ignore t :which-key "bookmark prefix")
+   "rb" 'bookmark-jump
+   "rm" 'bookmark-set
+   "rl" 'bookmark-bmenu-list
+   "ro" 'bookmark-jump-other-window)
 #+end_src
 *** Local
 **** Org-mode
 #+begin_src emacs-lisp
   (my-local-leader-def
-    :states 'normal
+    :states '(normal visual motion)
     :keymaps 'org-mode-map
     "y" 'org-store-link
     "p" 'org-insert-link
+    "o" '(:ignore t :which-key "clock prefix")
+    "oi" 'org-clock-in
+    "oo" 'org-clock-out
+    "ol" 'org-clock-in-last
+    "or" 'org-clock-in-resume
     )
 #+end_src
 **** Org-capture
