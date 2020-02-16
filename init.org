@@ -381,12 +381,10 @@ Tangle
 #+end_src
 ** pdf-tools
 #+begin_src emacs-lisp
-  (use-package pdf-tools
-    :config
-    (pdf-tools-install))
+  (use-package pdf-tools)
 #+end_src
 ** evil-mode
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
   (use-package evil
     :config
     (evil-mode 1)
@@ -394,7 +392,7 @@ Tangle
     (evil-set-initial-state 'dired-mode 'emacs))
 #+end_src
 ** Evil support packages
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
   (use-package evil-anzu
     :after evil
     :init
@@ -454,16 +452,25 @@ Tangle
 #+end_src
 ** Agenda setup
 #+BEGIN_SRC emacs-lisp :tangle yes
-(require 'org-habit)
-(setq spacemacs-theme-org-agenda-height nil
-      org-agenda-start-day "-1d"
-      org-agenda-skip-scheduled-if-done t
-      org-agenda-skip-deadline-if-done t
-      org-agenda-include-deadlines t
-      org-agenda-include-diary t
-      org-agenda-block-separator nil
-      org-agenda-compact-blocks t
-      org-agenda-start-with-log-mode t)
+  (require 'org-habit)
+  (setq org-agenda-files (list "~/Dropbox/orggtd/todo.org"
+                               "~/Dropbox/orggtd/mobile.org"
+                               "~/Onedrive - ABB/tender.org"
+                               "~/Dropbox/orggtd/emacs-bindings.org"))
+  (setq org-refile-files (list "~/Dropbox/orggtd/todo.org"
+                               "~/Dropbox/orggtd/mobile.org"
+                               "~/Onedrive - ABB/tender.org"
+                               "~/Dropbox/orggtd/someday.org"
+                               "~/Dropbox/orggtd/references.org"))
+  (setq spacemacs-theme-org-agenda-height nil
+        org-agenda-start-day "-1d"
+        org-agenda-skip-scheduled-if-done t
+        org-agenda-skip-deadline-if-done t
+        org-agenda-include-deadlines t
+        org-agenda-include-diary t
+        org-agenda-block-separator nil
+        org-agenda-compact-blocks t
+        org-agenda-start-with-log-mode t)
 #+END_SRC
 *** Habit and clocking
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -767,14 +774,14 @@ Tangle
 #+end_src
 ** Leader keybindings
 *** Define leader key
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
   (general-create-definer my-leader-def
     :prefix "SPC")
   (general-create-definer my-local-leader-def
     :prefix ",")
 #+end_src
 *** Global
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
   (my-leader-def 'normal
    "SPC" 'counsel-M-x
    "f" '(:ignore t :which-key "file prefix")
@@ -791,7 +798,7 @@ Tangle
 #+end_src
 *** Local
 **** Org-mode
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
   (my-local-leader-def
     :states '(normal visual motion)
     :keymaps 'org-mode-map
@@ -805,7 +812,7 @@ Tangle
     )
 #+end_src
 **** Org-capture
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
   (general-define-key
    :keymaps 'org-capture-mode-map
    [remap evil-save-and-close]          'org-capture-finalize
