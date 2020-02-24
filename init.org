@@ -62,6 +62,7 @@ Tangle
 #+begin_src emacs-lisp
   (setq w32-pass-apps-to-system nil)
   (setq w32-apps-modifier 'hyper) ; Menu/App key
+  (ido-mode nil)
   (use-package gcmh
     :config
     (gcmh-mode 1))
@@ -77,7 +78,7 @@ Tangle
   (setq
    cursor-in-non-selected-windows t  ; Hide the cursor in inactive windows
    inhibit-splash-screen t
-   default-frame-alist '((font . "Source Code Pro-12"))
+   default-frame-alist '((font . "Source Code Pro-9"))
    echo-keystrokes 0.1               ; Show keystrokes right away, don't show the message in the scratch buffe
    initial-scratch-message nil       ; Empty scratch buffer
    initial-major-mode 'org-mode      ; org mode by default
@@ -86,6 +87,27 @@ Tangle
    )
 #+end_src
 * Utilities setup
+** Hyperbole
+#+begin_src emacs-lisp
+  (use-package hyperbole)
+#+end_src
+** Org-roam
+#+begin_src emacs-lisp
+  (use-package org-roam
+        :after org
+        :hook 
+        (after-init . org-roam-mode)
+        :straight (:host github :repo "jethrokuan/org-roam" :branch "develop")
+        :custom
+        (org-roam-directory "~/Dropbox/Archives")
+        (org-roam-filename-noconfirm nil)
+        :bind (:map org-roam-mode-map
+                (("C-c n l" . org-roam)
+                 ("C-c n f" . org-roam-find-file)
+                 ("C-c n g" . org-roam-show-graph))
+                :map org-mode-map
+                (("C-c n i" . org-roam-insert))))
+#+end_src
 ** ivy and counsel bundle
 #+begin_src emacs-lisp
   (use-package ivy
@@ -751,6 +773,7 @@ Tangle
 #+begin_src emacs-lisp
   (general-define-key
    :keymaps 'global
+   "H-RET" 'action-key
    "H-," 'my-pop-local-mark-ring
    "H-." 'unpop-to-mark-command
    "H-<" 'previous-buffer
@@ -977,4 +1000,16 @@ Skip project and sub-project tasks, habits, and loose non-project tasks."
       (interactive)
     (let ((counsel-fzf-cmd "find ~/Dropbox/Calibre | grep -E \"(*.pdf)\" | fzf -f \"%s\" "))
     (counsel-fzf)))
+#+end_src
+#+begin_src emacs-lisp
+  (defun hai/create-file-tender (filename)
+    (if (file-exists-p filename)
+        (find-file filename)
+      (org-store-link nil t)
+      (find-file filename)
+      (goto-char (point-max))
+      (newline)
+      (org-insert-link nil (car (car org-stored-links)) "Link to Task")
+      )    
+    )
 #+end_src
