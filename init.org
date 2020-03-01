@@ -20,7 +20,6 @@ Tangle and byte compile
                   (concat "init.org"))
        (org-babel-tangle)
        (byte-recompile-directory (expand-file-name user-emacs-directory) 0)))
-  (add-hook 'after-save-hook #'my--tangle-byte-compile-org)
 #+END_SRC
 
 Tangle
@@ -78,7 +77,7 @@ Tangle
   (setq
    cursor-in-non-selected-windows t  ; Hide the cursor in inactive windows
    inhibit-splash-screen t
-   default-frame-alist '((font . "Source Code Pro-9"))
+   default-frame-alist '((font . "Source Code Pro-12"))
    echo-keystrokes 0.1               ; Show keystrokes right away, don't show the message in the scratch buffe
    initial-scratch-message nil       ; Empty scratch buffer
    initial-major-mode 'org-mode      ; org mode by default
@@ -86,7 +85,31 @@ Tangle
    confirm-kill-emacs 'y-or-n-p      ; y and n instead of yes and no when quitting
    )
 #+end_src
+** Detect system
+#+begin_src emacs-lisp
+  ;; Check if system is Microsoft Windows
+  (defun my-system-type-is-windows ()
+    "Return true if system is Windows-based (at least up to Win7)"
+    (string-equal system-type "windows-nt")
+    )
+
+  ;; Check if system is GNU/Linux
+  (defun my-system-type-is-gnu ()
+    "Return true if system is GNU/Linux-based"
+    (string-equal system-type "gnu/linux")
+    )
+#+end_src
 * Utilities setup
+** Org-download
+#+begin_src emacs-lisp
+  (use-package org-download
+    :after org
+    :bind
+    (:map org-mode-map
+          (("H-Y" . org-download-screenshot)
+           ("H-y" . org-download-yank))))
+
+#+end_src
 ** Hyperbole
 #+begin_src emacs-lisp
   (use-package hyperbole)
@@ -403,7 +426,9 @@ Tangle
 #+end_src
 ** pdf-tools
 #+begin_src emacs-lisp
-  (use-package pdf-tools)
+  (use-package pdf-tools
+    :config
+    (pdf-tools-install))
 #+end_src
 ** evil-mode
 #+begin_src emacs-lisp :tangle no
@@ -445,7 +470,7 @@ Tangle
     (setq org-brain-path "~/Dropbox/brain")
     :config
     (setq org-id-track-globally t)
-    (setq org-id-locations-file "~/.emacs.d/.org-id-locations")
+    (setq org-id-locations-file "~/Dropbox/brain/.org-id-locations")
     (setq org-brain-visualize-default-choices 'all)
     (setq org-brain-title-max-length 12)
     (setq org-brain-include-file-entries nil
@@ -628,6 +653,7 @@ Tangle
 ** Python with elpy
 #+begin_src emacs-lisp :tangle no
   (use-package elpy
+    :if (my-system-type-is-windows)
     :config
     (elpy-enable))
 #+END_SRC
@@ -638,9 +664,14 @@ Tangle
 ** Python with lsp mode
 #+begin_src emacs-lisp :tangle yes
   (use-package lsp-mode
+    :if (my-system-type-is-gnu)
     :commands lsp)
-  (use-package company-lsp :commands company-lsp)
-  (use-package helm-lsp :commands helm-lsp-workspace-symbol)
+  (use-package company-lsp
+    :if (my-system-type-is-gnu)
+    :commands company-lsp)
+  (use-package helm-lsp
+    :if (my-system-type-is-gnu)
+    :commands helm-lsp-workspace-symbol)
 #+end_src
 ** pyvenv
 #+begin_src emacs-lisp :tangle yes
