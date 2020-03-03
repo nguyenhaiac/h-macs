@@ -110,6 +110,15 @@ Tangle
            ("H-y" . org-download-yank))))
 
 #+end_src
+** Mathpix
+#+begin_src emacs-lisp
+  (use-package mathpix.el
+    :straight (:host github :repo "jethrokuan/mathpix.el")
+    :custom ((mathpix-app-id "nguyentienhai_hotmail_com_vn_296734")
+             (mathpix-app-key "4ae18f5eca602ce01821"))
+    :bind
+    ("C-x m" . mathpix-screenshot))
+#+end_src
 ** Hyperbole
 #+begin_src emacs-lisp
   (use-package hyperbole)
@@ -476,6 +485,24 @@ Tangle
     (setq org-brain-include-file-entries nil
           org-brain-file-entries-use-title nil))
 #+end_src
+** Org-pdftools
+#+begin_src emacs-lisp
+  (use-package org-pdftools
+    :straight (org-pdftools :type git :host github :repo "fuxialexander/org-pdftools")
+    :config 
+    (with-eval-after-load 'org
+      (org-link-set-parameters "pdftools"
+                               :follow #'org-pdftools-open
+                               :complete #'org-pdftools-complete-link
+                               :store #'org-pdftools-store-link
+                               :export #'org-pdftools-export)
+      (add-hook 'org-store-link-functions 'org-pdftools-store-link)))
+#+end_src
+** dired+
+#+begin_src emacs-lisp
+  (use-package dired+)
+  (use-package w32-browser)
+#+end_src
 * Orgmode setup
 ** General setup
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -646,6 +673,12 @@ Tangle
     (add-to-list 'sml/replacer-regexp-list '("^~/Dropbox/" ":DBox:")))
 #+end_src
 * Programming setup
+** Webmode
+#+begin_src emacs-lisp
+  (use-package web-mode
+    :config
+    (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode)))
+#+end_src
 ** Magit - the king of git
 #+begin_src emacs-lisp :tangle yes
  (use-package magit)
@@ -824,7 +857,7 @@ Tangle
    "C-M-'" 'negative-argument)
   (sp-pair "(" ")" :wrap "H-(")
   (sp-pair "[" "]" :wrap "H-[")
-  (sp-pair "{" "}" :wrap "H-{") 
+  (sp-pair "{" "}" :wrap "H-{")
 #+end_src
 ** Leader keybindings
 *** Define leader key
