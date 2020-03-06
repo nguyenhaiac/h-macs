@@ -108,8 +108,12 @@ Tangle
     (:map org-mode-map
           (("H-Y" . org-download-screenshot)
            ("H-y" . org-download-yank))))
-
+  (when (my-system-type-is-windows)
+    (setq org-download-screenshot-method "magick convert clipboard: %s")
+    (setq-default org-download-image-dir "~/Dropbox/brain/images")
+    )
 #+end_src
+
 ** Mathpix
 #+begin_src emacs-lisp
   (use-package mathpix.el
