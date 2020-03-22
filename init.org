@@ -6,7 +6,6 @@
 ;;; -*- lexical-binding: t -*-
 #+END_SRC
 
-
 * Initialize the configuration
 ** Tangle & byte compile
 
@@ -84,9 +83,16 @@ Tangle
    custom-safe-themes t
    confirm-kill-emacs 'y-or-n-p      ; y and n instead of yes and no when quitting
    )
-  (add-hook 'org-mode-hook 'variable-pitch-mode)
   (add-hook 'org-mode-hook 'visual-line-mode)
   (set-default 'truncate-lines nil)
+  (ido-mode nil)
+  (add-hook 'org-mode-hook 'hl-line-mode)
+  (setq line-spacing 0.15)
+  (lambda () (progn
+    (setq left-margin-width 2)
+    (setq right-margin-width 2)
+    (set-window-buffer nil (current-buffer))))
+  (setq org-tags-column 100)
 #+end_src
 ** Detect system
 #+begin_src emacs-lisp
@@ -111,13 +117,13 @@ Tangle
           doom-themes-enable-italic t))
 #+end_src
 ** kaolin themes
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle yes
   (use-package kaolin-themes
     :config
-    (load-theme 'kaolin-valley-light t))
+    (load-theme 'doom-solarized-dark))
 #+end_src
 ** Smart-mode-line
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
   (use-package smart-mode-line-atom-one-dark-theme)
   (use-package smart-mode-line
     :config
@@ -128,47 +134,16 @@ Tangle
 ** Material theme
 #+begin_src emacs-lisp
   (use-package flatland-theme)
-  (load-theme 'flatland t)
-
 #+end_src
-** Org-mode themes
+** Doom-modeline
 #+begin_src emacs-lisp
-  (let* ((variable-tuple (cond ((x-list-fonts "Source Sans Pro") '(:font "Source Sans Pro"))
-                               ((x-list-fonts "Lucida Grande")   '(:font "Lucida Grande"))
-                               ((x-list-fonts "Verdana")         '(:font "Verdana"))
-                               ((x-family-fonts "Sans Serif")    '(:family "Sans Serif"))
-                               (nil (warn "Cannot find a Sans Serif Font.  Install Source Sans Pro."))))
-         (base-font-color     (face-foreground 'default nil 'default))
-         (headline           `(:inherit default :weight bold :foreground ,base-font-color)))
-
-    (custom-theme-set-faces 'user
-                            `(org-level-8 ((t (,@headline ,@variable-tuple))))
-                            `(org-level-7 ((t (,@headline ,@variable-tuple))))
-                            `(org-level-6 ((t (,@headline ,@variable-tuple))))
-                            `(org-level-5 ((t (,@headline ,@variable-tuple))))
-                            `(org-level-4 ((t (,@headline ,@variable-tuple :height 1.0))))
-                            `(org-level-3 ((t (,@headline ,@variable-tuple :height 1.1))))
-                            `(org-level-2 ((t (,@headline ,@variable-tuple :height 1.2))))
-                            `(org-level-1 ((t (,@headline ,@variable-tuple :height 1.3))))
-                            `(org-document-title ((t (,@headline ,@variable-tuple :height 1.5 :underline nil))))))
-  (custom-theme-set-faces
-   'user
-   '(variable-pitch ((t (:family "Source Sans Pro-9" :weight light))))
-   '(fixed-pitch ((t ( :family "Fira Code-9" :slant normal :weight normal :height 1.0 :width normal)))))
-  (custom-theme-set-faces
-   'user
-   '(org-block ((t (:inherit fixed-pitch))))
-   '(org-code ((t (:inherit (shadow fixed-pitch)))))
-   '(org-document-info ((t (:foreground "dark orange"))))
-   '(org-document-info-keyword ((t (:inherit (shadow fixed-pitch)))))
-   '(org-indent ((t (:inherit (org-hide fixed-pitch)))))
-   '(org-link ((t (:foreground "royal blue" :underline t))))
-   '(org-meta-line ((t (:inherit (font-lock-comment-face fixed-pitch)))))
-   '(org-property-value ((t (:inherit fixed-pitch))) t)
-   '(org-special-keyword ((t (:inherit (font-lock-comment-face fixed-pitch)))))
-   '(org-table ((t (:inherit fixed-pitch :foreground "#83a598"))))
-   '(org-tag ((t (:inherit (shadow fixed-pitch) :weight bold :height 0.8))))
-   '(org-verbatim ((t (:inherit (shadow fixed-pitch))))))
+  (use-package doom-modeline
+    :ensure t
+    :init (doom-modeline-mode 1)
+    :config
+    (setq doom-modeline-lsp t
+          doom-modeline-env-enable-python t
+          doom-modeline-project-detection 'project))
 #+end_src
 * Utilities setup
 ** Org-download
@@ -236,6 +211,78 @@ Tangle
   (use-package undo-fu)
 #+end_src
 
+** Deadgrep
+#+begin_src emacs-lisp
+  (use-package deadgrep)
+#+end_src
+** Org-mode GTD
+*** Settings
+#+begin_src emacs-lisp
+  (require 'org-habit)
+  (setq org-agenda-files (list "~/Dropbox/orggtd/todo.org"
+                               "~/Dropbox/orggtd/mobile.org"
+                               "~/Onedrive - ABB/tender.org"
+                               "~/Dropbox/orggtd/emacs-bindings.org"))
+  (setq org-refile-files (list "~/Dropbox/orggtd/todo.org"
+                               "~/Dropbox/orggtd/mobile.org"
+                               "~/Onedrive - ABB/tender.org"
+                               "~/Dropbox/orggtd/someday.org"
+                               "~/Dropbox/orggtd/references.org"))
+  (setq spacemacs-theme-org-agenda-height nil
+        org-agenda-start-day "-1d"
+        org-agenda-skip-scheduled-if-done t
+        org-agenda-skip-deadline-if-done t
+        org-agenda-include-deadlines t
+        org-agenda-include-diary t
+        org-agenda-block-separator nil
+        org-agenda-compact-blocks t
+        org-agenda-start-with-log-mode t
+        org-habit-following-days 7
+        org-habit-preceding-days 10
+        org-habit-show-habits-only-for-today t
+        org-agenda-tags-column -102
+        org-habit-graph-column 50
+        org-clock-out-remove-zero-time-clocks t
+        org-clock-out-when-done t
+        org-clock-persist t)
+#+end_src
+*** Org-todo keywords
+#+begin_src emacs-lisp
+  (setq org-todo-keyword-faces
+        '(("TODO" . org-warning)
+          ("STRT" . "yellow")
+          ("NEXT" . "orange")
+          ("WAIT" . "gray")
+          ("TOREAD" . "green")
+          ("CANCELED" . (:foreground "blue" :weight bold))))
+  (setq org-todo-keywords
+        '((sequence
+           "TODO(t)"  ; A task that needs doing & is ready to do
+           "NEXT(n)"
+           "STRT(s)"  ; A task that is in progress
+           "WAIT(w)"  ; Something is holding up this task; or it is paused
+           "TOREAD(r)"
+           "|"
+           "DONE(d)"  ; Task successfully completed
+           "PHONE(p)"
+           "READ(R)"
+           "MEETING(m)"
+           "KILL(k)")))
+#+end_src
+** Deft and zetteldeft
+#+begin_src emacs-lisp
+  (use-package deft
+    :init
+    (setq deft-extensions '("org" "md")
+          deft-recursive t
+          deft-directory "~/Dropbox/Archives"
+          deft-use-filename-as-title t
+          deft-file-naming-rules '((noslash . "-")
+                                   (nospace . "-")
+                                   (case-fn . downcase))))
+  (use-package zetteldeft
+    :after deft)
+#+end_src
 * Programming setup
 ** Projectile
 #+begin_src emacs-lisp
@@ -286,7 +333,8 @@ Tangle
     :init
     (setq lsp-keymap-prefix "C-c l")
     :hook
-    (lsp-mode . lsp-enable-which-key-integration))
+    (lsp-mode . lsp-enable-which-key-integration)
+    (python-mode . lsp))
 #+end_src
 ** pyvenv
 #+begin_src emacs-lisp :tangle yes
@@ -372,7 +420,26 @@ Tangle
 #+begin_src emacs-lisp
   (my-leader-def
     "a" 'org-agenda
-    "c" 'org-capture)
+    "c" 'org-capture
+    "r" 'deadgrep
+    "d" '(:ignore t :which-key "Deft")
+    "dd" 'deft
+    "dn" 'zetteldeft-new-file
+    "dr" 'deft-refresh
+    "ds" 'zetteldeft-search-at-point
+    "dc" 'zetteldeft-search-current-id
+    "df" 'zetteldeft-follow-link
+    "dF" 'zetteldeft-avy-file-search-ace-window
+    "dl" 'zetteldeft-avy-link-search
+    "dt" 'zetteldeft-avy-tag-search
+    "dT" 'zetteldeft-tag-buffer
+    "di" 'zetteldeft-find-file-id-insert
+    "dI" 'zetteldeft-find-file-full-title-insert
+    "do" 'zetteldeft-find-file
+    "dn" 'zetteldeft-new-file
+    "dN" 'zetteldeft-new-file-and-link
+    "dr" 'zetteldeft-file-rename
+    "dx" 'zetteldeft-count-words)
   (general-define-key
    "C-z" 'undo-fu-only-undo
    "C-S-z" 'undo-fu-only-redo)
@@ -400,6 +467,16 @@ Tangle
     "ci" 'org-clock-in
     "cI" 'org-clock-in-last
     "co" 'org-clock-out)
+#+end_src
+*** Org-mode navigation
+#+begin_src emacs-lisp
+  (general-define-key
+   :keymaps 'org-mode-map
+   "H-n" 'outline-next-visible-heading
+   "H-p" 'outline-previous-visible-heading
+   "H-b" 'org-backward-heading-same-level
+   "H-f" 'org-forward-heading-same-level
+   "H-u" 'outline-up-heading)
 #+end_src
 * Helper functions
 ** Find book and open it with org noter 
