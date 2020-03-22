@@ -7,7 +7,7 @@
 #+END_SRC
 
 
-* Initialize the configurationk
+* Initialize the configuration
 ** Tangle & byte compile
 
 Tangle and byte compile
@@ -77,13 +77,16 @@ Tangle
   (setq
    cursor-in-non-selected-windows t  ; Hide the cursor in inactive windows
    inhibit-splash-screen t
-   default-frame-alist '((font . "Source Code Pro-12"))
+   default-frame-alist '((font . "Fira Code-10"))
    echo-keystrokes 0.1               ; Show keystrokes right away, don't show the message in the scratch buffe
    initial-scratch-message nil       ; Empty scratch buffer
    initial-major-mode 'org-mode      ; org mode by default
    custom-safe-themes t
    confirm-kill-emacs 'y-or-n-p      ; y and n instead of yes and no when quitting
    )
+  (add-hook 'org-mode-hook 'variable-pitch-mode)
+  (add-hook 'org-mode-hook 'visual-line-mode)
+  (set-default 'truncate-lines nil)
 #+end_src
 ** Detect system
 #+begin_src emacs-lisp
@@ -99,309 +102,6 @@ Tangle
     (string-equal system-type "gnu/linux")
     )
 #+end_src
-* Utilities setup
-** Org-download
-#+begin_src emacs-lisp
-  (use-package org-download
-    :after org
-    :bind
-    (:map org-mode-map
-          (("H-Y" . org-download-screenshot)
-           ("H-y" . org-download-yank))))
-  (when (my-system-type-is-windows)
-    (setq org-download-screenshot-method "magick convert clipboard: %s")
-    (setq-default org-download-image-dir "~/Dropbox/brain/images")
-    )
-#+end_src
-
-** Mathpix
-#+begin_src emacs-lisp
-  (use-package mathpix.el
-    :straight (:host github :repo "jethrokuan/mathpix.el")
-    :custom ((mathpix-app-id "nguyentienhai_hotmail_com_vn_296734")
-             (mathpix-app-key "4ae18f5eca602ce01821"))
-    :bind
-    ("C-x m" . mathpix-screenshot))
-#+end_src
-** Hyperbole
-#+begin_src emacs-lisp
-  (use-package hyperbole)
-#+end_src
-** Org-roam
-#+begin_src emacs-lisp :tangle no
-  (use-package org-roam
-        :after org
-        :hook 
-        (after-init . org-roam-mode)
-        :straight (:host github :repo "jethrokuan/org-roam" :branch "develop")
-        :custom
-        (org-roam-directory "~/Dropbox/Archives")
-        (org-roam-filename-noconfirm nil)
-        :bind (:map org-roam-mode-map
-                (("C-c n l" . org-roam)
-                 ("C-c n f" . org-roam-find-file)
-                 ("C-c n g" . org-roam-show-graph))
-                :map org-mode-map
-                (("C-c n i" . org-roam-insert))))
-#+end_src
-** ivy and counsel bundle
-#+begin_src emacs-lisp
-  (use-package ivy
-    :diminish ivy-mode
-    :config
-    (ivy-mode 1)
-    (setq ivy-use-virtual-buffers t)
-    (setq ivy-count-format "(%d/%d) ")
-    (setq enable-recursive-minibuffers t)
-    (setq ivy-initial-inputs-alist nil) )
-  (use-package counsel
-    :diminish counsel-mode
-    :config
-    (counsel-mode 1))
-  (use-package smex)
-  (use-package flx)
-  (use-package avy)
-#+end_src
-
-** Autocompletion with company-mode
-#+begin_src emacs-lisp
-  (use-package company
-      :config
-      (setq company-idle-delay 0.0
-            company-minimum-prefix-length 1)
-      (global-company-mode))
-#+end_src
-** Posframe and ivy-posframe
-#+begin_src emacs-lisp
-  (use-package posframe)
-  (use-package ivy-posframe
-    :config
-    (setq ivy-posframe-display-functions-alist
-          '((swiper          . ivy-posframe-display-at-frame-center)
-            (swiper-isearch  . ivy-posframe-display-at-frame-center)
-            (complete-symbol . ivy-posframe-display-at-point)
-            (counsel-M-x     . ivy-posframe-display-at-frame-center)
-            (counsel-find-file     . ivy-posframe-display-at-frame-center)
-            (t               . ivy-posframe-display)))
-    (ivy-posframe-mode 1)
-  )
-#+end_src
-** Whichkey
-#+begin_src emacs-lisp
-  (use-package which-key
-    :config
-    (which-key-mode))
-#+end_src
-** Deft and zettledeft
-*** Deft
-#+begin_src emacs-lisp
-  (use-package deft
-    :defer t
-    :commands (deft))
-  (setq deft-directory "~/Dropbox/Archives"
-                      deft-text-mode 'org-mode
-                      deft-extensions '("org")
-                      deft-recursive t
-                      deft-use-filename-as-title nil)
-  (setq deft-file-naming-rules
-        '((noslash . "-")
-          (nospace . "-")
-          (case-fn . downcase)))
-  (setq deft-org-mode-title-prefix t)
-#+end_src
-*** Zetteldeft
-#+begin_src emacs-lisp
-  (use-package zetteldeft
-    :straight (zetteldeft :type git :host github :repo "EFLS/zetteldeft"))
-#+end_src
-
-** Smartparens
-#+begin_src emacs-lisp
-  (use-package smartparens
-    :config
-    (smartparens-global-mode))
-#+end_src
-** Undo-fu
-#+begin_src emacs-lisp
-  (use-package undo-fu)
-#+end_src
-** hydra
-#+begin_src emacs-lisp
-  (use-package hydra)
-#+end_src
-*** Some useful hydra
-**** Lsp mode
-#+begin_src emacs-lisp :tangle yes
-  (defhydra hydra-lsp (:exit t :hint nil)
-    "
-   Buffer^^               Server^^                   Symbol
-  -------------------------------------------------------------------------------------
-   [_f_] format           [_M-r_] restart            [_d_] declaration  [_i_] implementation  [_o_] documentation
-   [_m_] imenu            [_S_]   shutdown           [_D_] definition   [_t_] type            [_r_] rename
-   [_x_] execute action   [_M-s_] describe session   [_R_] references   [_s_] signature"
-    ("d" lsp-find-declaration)
-    ("D" lsp-ui-peek-find-definitions)
-    ("R" lsp-ui-peek-find-references)
-    ("i" lsp-ui-peek-find-implementation)
-    ("t" lsp-find-type-definition)
-    ("s" lsp-signature-help)
-    ("o" lsp-describe-thing-at-point)
-    ("r" lsp-rename)
-
-    ("f" lsp-format-buffer)
-    ("m" lsp-ui-imenu)
-    ("x" lsp-execute-code-action)
-
-    ("M-s" lsp-describe-session)
-    ("M-r" lsp-restart-workspace)
-    ("S" lsp-shutdown-workspace))
-#+end_src
-* Orgmode setup
-** General setup
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (add-hook 'org-mode-hook 'org-indent-mode)
-  (add-hook 'org-mode-hook #'visual-line-mode)
-  (setq org-refile-use-outline-path 'file)
-  (setq org-use-fast-todo-selection t)
-  (setq org-treat-S-cursor-todo-selection-as-state-change nil)
-  (setq org-agenda-time-grid
-        (quote
-         ((daily today remove-match)
-          (900 1100 1300 1500 1700)
-          "......" "----------------")))
-  (setq org-outline-path-complete-in-steps nil)
-  (setq org-refile-allow-creating-parent-nodes 'confirm)
-  (setq org-refile-targets '((org-refile-files :maxlevel . 3)))
-
-#+END_SRC
-** Org-noter
-#+begin_src emacs-lisp
-  (use-package org-noter)
-#+end_src
-** Agenda setup
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (require 'org-habit)
-  (setq org-agenda-files (list "~/Dropbox/orggtd/todo.org"
-                               "~/Dropbox/orggtd/mobile.org"
-                               "~/Onedrive - ABB/tender.org"
-                               "~/Dropbox/orggtd/emacs-bindings.org"))
-  (setq org-refile-files (list "~/Dropbox/orggtd/todo.org"
-                               "~/Dropbox/orggtd/mobile.org"
-                               "~/Onedrive - ABB/tender.org"
-                               "~/Dropbox/orggtd/someday.org"
-                               "~/Dropbox/orggtd/references.org"))
-  (setq spacemacs-theme-org-agenda-height nil
-        org-agenda-start-day "-1d"
-        org-agenda-skip-scheduled-if-done t
-        org-agenda-skip-deadline-if-done t
-        org-agenda-include-deadlines t
-        org-agenda-include-diary t
-        org-agenda-block-separator nil
-        org-agenda-compact-blocks t
-        org-agenda-start-with-log-mode t)
-#+END_SRC
-*** Habit and clocking
-#+BEGIN_SRC emacs-lisp :tangle yes
-(setq  org-habit-following-days 7
-       org-habit-preceding-days 10
-       org-habit-show-habits-only-for-today t)
-(setq org-agenda-tags-column -102)
-(setq org-habit-graph-column 50)
-(setq org-clock-out-remove-zero-time-clocks t)
-(setq org-clock-out-when-done t)
-(setq org-clock-persist t)
-#+END_SRC
-** Org-todo-keywords
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (setq org-todo-keywords
-        '((sequence
-           "TODO(t)"  ; A task that needs doing & is ready to do
-           "NEXT(n)"
-           "STRT(s)"  ; A task that is in progress
-           "WAIT(w)"  ; Something is holding up this task; or it is paused
-           "TOREAD(r)"
-           "|"
-           "DONE(d)"  ; Task successfully completed
-           "PHONE(p)"
-           "READ(R)"
-           "MEETING(m)"
-           "KILL(k)")))
-#+END_SRC
-*** Org-agenda config
-** Org-capture
-
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (setq org-protocol-capture-html-pandoc-no-wrap-option "--wrap=auto")
-  (setq org-capture-templates
-        (quote (("t" "todo" entry (file+headline "~/Dropbox/orggtd/todo.org" "Inbox")
-                 "* TODO %?\n%U\n%a\n" :clock-in t :clock-resume t)
-                ("n" "note" entry (file "~/Dropbox/orggtd/notes.org")
-                 "* %? %^G :NOTE:\n%U\n%a\n" :clock-in t :clock-resume t)
-                ("w" "Web site" entry (file+headline "~/Dropbox/orggtd/todo.org" "Inbox")
-                 "* %a :website:\n\n%U %?\n\n%:initial" :immediate-finish t)
-                ("j" "Journal" entry (file+datetree "~/Dropbox/orggtd/journal.org")
-                 "* %?\n%U\n" :clock-in t :clock-resume t)
-                ("m" "Meeting" entry (file "~/Dropbox/orggtd/todo.org")
-                 "* MEETING with %? :MEETING:\n%U" :clock-in t :clock-resume t)
-                ("r" "Reading list" entry (file+headline "~/Dropbox/orggtd/todo.org" "ToRead")
-                 "* TOREAD %?\n:PROPERTIES:\n:SERIES:\n:AUTHOR:\n:RATING:\n:ADDED:%U\n:END:")
-                ("p" "Phone call" entry (file "~/Dropbox/orggtd/todo.org")
-                 "* PHONE %? :PHONE:\n%U" :clock-in t :clock-resume t)
-                ("h" "Habit" entry (file "~/Dropbox/orggtd/todo.org")
-                 "* NEXT %?\nSCHEDULED: <%<%Y-%m-%d %a .+1d>>\n:PROPERTIES:\n:CREATED: %U\n:STYLE: habit\n:REPEAT_TO_STATE: NEXT\n:LOGGING: DONE(!)\n:ARCHIVE: %%s_archive::* Habits\n:END:\n%U\n"
-                 ))))
-#+END_SRC
-
-** Org-babel setting
-   #+begin_src emacs-lisp :tangle yes
-          (org-babel-do-load-languages
-           'org-babel-load-languages
-           '((ruby . t)
-             (dot . t)
-             (groovy . t)
-             (shell . t)
-             (python . t)
-             (emacs-lisp . t)
-             (matlab . t)
-             (latex . t)
-             (C . t)
-             (J . t)
-             (java . t)
-             (scheme . t)
-             (lisp . t)
-             (latex . t)
-             (R . t)
-             (sql . t)
-             (calc . t)))
-
-          (eval-when-compile
-            (require 'ob-C)
-            (require 'ob-ruby)
-            (require 'ob-python)
-            (require 'ob-scheme)
-            (require 'ob-clojure))
-          (setq org-confirm-babel-evaluate nil)
-   #+end_src
-
-   #+RESULTS:
-
-*** Org babel header
-    #+begin_src emacs-lisp :tangle yes
-      ;;* Python
-      (setq org-babel-default-header-args:python
-	    '((:results . "output")))
-      (setq org-babel-python-command "python3")
-
-      ;;* Bash
-      (setq org-babel-default-header-args:sh
-	    '((:results . "verbatim")))
-      (setq org-babel-default-header-args:bash
-	    '((:results . "verbatim")))
-
-      (setq org-babel-default-header-args:C
-	    '((:results . "org")
-	      (:exports . "both")))
-    #+end_src
 * Aesthetic improvement
 ** Doom themes
 #+begin_src emacs-lisp :tangle yes
@@ -431,6 +131,111 @@ Tangle
   (load-theme 'flatland t)
 
 #+end_src
+** Org-mode themes
+#+begin_src emacs-lisp
+  (let* ((variable-tuple (cond ((x-list-fonts "Source Sans Pro") '(:font "Source Sans Pro"))
+                               ((x-list-fonts "Lucida Grande")   '(:font "Lucida Grande"))
+                               ((x-list-fonts "Verdana")         '(:font "Verdana"))
+                               ((x-family-fonts "Sans Serif")    '(:family "Sans Serif"))
+                               (nil (warn "Cannot find a Sans Serif Font.  Install Source Sans Pro."))))
+         (base-font-color     (face-foreground 'default nil 'default))
+         (headline           `(:inherit default :weight bold :foreground ,base-font-color)))
+
+    (custom-theme-set-faces 'user
+                            `(org-level-8 ((t (,@headline ,@variable-tuple))))
+                            `(org-level-7 ((t (,@headline ,@variable-tuple))))
+                            `(org-level-6 ((t (,@headline ,@variable-tuple))))
+                            `(org-level-5 ((t (,@headline ,@variable-tuple))))
+                            `(org-level-4 ((t (,@headline ,@variable-tuple :height 1.0))))
+                            `(org-level-3 ((t (,@headline ,@variable-tuple :height 1.1))))
+                            `(org-level-2 ((t (,@headline ,@variable-tuple :height 1.2))))
+                            `(org-level-1 ((t (,@headline ,@variable-tuple :height 1.3))))
+                            `(org-document-title ((t (,@headline ,@variable-tuple :height 1.5 :underline nil))))))
+  (custom-theme-set-faces
+   'user
+   '(variable-pitch ((t (:family "Source Sans Pro-9" :weight light))))
+   '(fixed-pitch ((t ( :family "Fira Code-9" :slant normal :weight normal :height 1.0 :width normal)))))
+  (custom-theme-set-faces
+   'user
+   '(org-block ((t (:inherit fixed-pitch))))
+   '(org-code ((t (:inherit (shadow fixed-pitch)))))
+   '(org-document-info ((t (:foreground "dark orange"))))
+   '(org-document-info-keyword ((t (:inherit (shadow fixed-pitch)))))
+   '(org-indent ((t (:inherit (org-hide fixed-pitch)))))
+   '(org-link ((t (:foreground "royal blue" :underline t))))
+   '(org-meta-line ((t (:inherit (font-lock-comment-face fixed-pitch)))))
+   '(org-property-value ((t (:inherit fixed-pitch))) t)
+   '(org-special-keyword ((t (:inherit (font-lock-comment-face fixed-pitch)))))
+   '(org-table ((t (:inherit fixed-pitch :foreground "#83a598"))))
+   '(org-tag ((t (:inherit (shadow fixed-pitch) :weight bold :height 0.8))))
+   '(org-verbatim ((t (:inherit (shadow fixed-pitch))))))
+#+end_src
+* Utilities setup
+** Org-download
+#+begin_src emacs-lisp
+  (use-package org-download
+    :after org
+    :bind
+    (:map org-mode-map
+          (("H-Y" . org-download-screenshot)
+           ("H-y" . org-download-yank))))
+  (when (my-system-type-is-windows)
+    (setq org-download-screenshot-method "magick convert clipboard: %s")
+    (setq-default org-download-image-dir "~/Dropbox/brain/images")
+    )
+#+end_src
+
+** Hyperbole
+#+begin_src emacs-lisp
+  (use-package hyperbole)
+#+end_src
+** ivy and counsel bundle
+#+begin_src emacs-lisp
+  (use-package ivy
+    :diminish ivy-mode
+    :config
+    (ivy-mode 1)
+    (setq ivy-use-virtual-buffers t)
+    (setq ivy-count-format "(%d/%d) ")
+    (setq enable-recursive-minibuffers t)
+    (setq ivy-initial-inputs-alist nil) )
+  (use-package counsel
+    :diminish counsel-mode
+    :config
+    (counsel-mode 1))
+  (use-package avy)
+#+end_src
+** Autocompletion with company-mode
+#+begin_src emacs-lisp
+  (use-package company
+      :config
+      (setq company-idle-delay 0.0
+            company-minimum-prefix-length 1)
+      (global-company-mode))
+#+end_src
+** Whichkey
+#+begin_src emacs-lisp
+  (use-package which-key
+    :config
+    (which-key-mode))
+#+end_src
+** Smartparens
+#+begin_src emacs-lisp
+  (use-package smartparens
+    :config
+    (smartparens-global-mode))
+#+end_src
+** Org-bullets
+#+begin_src emacs-lisp
+  (use-package org-bullets
+    :config
+    (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+#+end_src
+** Undo-fu
+#+begin_src emacs-lisp
+  (use-package undo-fu)
+#+end_src
+
 * Programming setup
 ** Projectile
 #+begin_src emacs-lisp
@@ -453,14 +258,13 @@ Tangle
     (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
     (setq web-mode-engines-alist '(("django" . "\\.html\\'")))
     (setq web-mode-enable-auto-pairing nil))
-
 #+end_src
 ** Magit - the king of git
 #+begin_src emacs-lisp :tangle yes
  (use-package magit)
 #+END_SRC
 ** Python with elpy
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle yes
   (use-package elpy
     :if (my-system-type-is-windows)
     :config
@@ -478,13 +282,11 @@ Tangle
 #+begin_src emacs-lisp :tangle yes
   (use-package lsp-mode
     :if (my-system-type-is-gnu)
-    :commands lsp)
-  (use-package company-lsp
-    :if (my-system-type-is-gnu)
-    :commands company-lsp)
-  (use-package helm-lsp
-    :if (my-system-type-is-gnu)
-    :commands helm-lsp-workspace-symbol)
+    :commands lsp
+    :init
+    (setq lsp-keymap-prefix "C-c l")
+    :hook
+    (lsp-mode . lsp-enable-which-key-integration))
 #+end_src
 ** pyvenv
 #+begin_src emacs-lisp :tangle yes
@@ -557,287 +359,49 @@ Tangle
     "List of actions for `aw-dispatch-default'.")
   )
 #+END_SRC
-** For orgmode navigation
-#+begin_src emacs-lisp :tangle yes
-  (general-define-key
-   :keymap 'org-mode-map
-   "H-n" 'org-next-visible-heading
-   "H-p" 'org-previous-visible-heading
-   "H-b" 'org-backward-heading-same-level
-   "H-f" 'org-forward-heading-same-level
-   "H-o ." 'org-demote-subtree
-   "H-o ," 'org-promote-subtree
-   )
-#+end_src
-** Prefix commands
-*** Hyper-C prefix
-#+begin_src emacs-lisp
-  (general-define-key
-   :keymaps 'global
-   :prefix "H-c"
-   "d" '(:ignore t :which-key "Deft")
-   "dd" 'deft
-   "dn" 'zetteldeft-new-file
-   "dN" 'zetteldeft-new-file-and-link
-   "dr" 'zetteldeft-file-rename
-   "ds" 'zetteldeft-search-at-point
-   "dc" 'zetteldeft-search-current-id
-   "df" 'zetteldeft-follow-link
-   "dF" 'zetteldeft-avy-file-search-ace-window
-   "dl" 'zetteldeft-avy-link-search
-   "dt" 'zetteldeft-avy-tag-search
-   "dT" 'zetteldeft-tag-buffer
-   "di" 'zetteldeft-find-file-id-insert
-   "dI" 'zetteldeft-find-file-full-title-insert
-   "do" 'zetteldeft-find-file
-   )
-#+end_src
-*** Control-C prefix
-#+begin_src emacs-lisp
-  (general-define-key
-   :keymaps 'global
-   :prefix "C-c"
-   "o" 'org-agenda
-   "p" 'projectile-command-map
-   "c" 'org-capture
-   "f" 'hai/helm-org-rifle-archives
-   "l" 'hydra-lsp/body
-   "e" 'elfeed
-   "r" 'hai/helm-org-rifle-archives
-   )
-#+end_src
-** Non-prefix keybindings
-#+begin_src emacs-lisp
-  (general-define-key
-   :keymaps 'global
-   "H-k" 'copy-line
-   "C-z" 'undo-fu-only-undo
-   "C-S-z" 'undo-fu-only-redo
-   "H-RET" 'action-key
-   "H-." 'my-pop-local-mark-ring
-   "H-," 'unpop-to-mark-command
-   "H-<" 'previous-buffer
-   "H->" 'next-buffer
-   "M-<SPC>" 'set-mark-command
-   "C-s" 'swiper-isearch
-   "H-t" 'vterm-toggle
-   "H-s" 'deadgrep
-   )
-
-#+end_src
-** Smartparens
-#+begin_src emacs-lisp
-  (general-define-key
-   :keymap 'global
-   "C-M-'" 'negative-argument
-   "M-<DEL>" 'sp-unwrap-sexp)
-  (sp-pair "(" ")" :wrap "C-(")
-  (sp-pair "[" "]" :wrap "C-]")
-  (sp-pair "{" "}" :wrap "C-{")
-  (sp-pair "$" "$" :wrap "C-$")
-  (sp-pair "%" "%" :wrap "C-%")
-  (sp-pair "<" ">" :wrap "C->")
-
-#+end_src
 ** Leader keybindings
 *** Define leader key
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle yes
   (general-create-definer my-leader-def
-    :prefix "SPC")
+    :prefix "C-c")
   (general-create-definer my-local-leader-def
-    :prefix ",")
+    :prefix "C-c m")
 #+end_src
-*** Global
-#+begin_src emacs-lisp :tangle no
-  (my-leader-def 'normal
-   "SPC" 'counsel-M-x
-   "f" '(:ignore t :which-key "file prefix")
-   "ff" 'counsel-find-file
-   "s" 'save-buffer
-   "b" '(:ignore t :which-key "buffer prefix")
-   "bb" 'switch-to-buffer
-   "bi" 'ibuffer
-   "r" '(:ignore t :which-key "bookmark prefix")
-   "rb" 'bookmark-jump
-   "rm" 'bookmark-set
-   "rl" 'bookmark-bmenu-list
-   "ro" 'bookmark-jump-other-window)
+*** General leader keybindings
+**** General keybindings
+#+begin_src emacs-lisp
+  (my-leader-def
+    "a" 'org-agenda
+    "c" 'org-capture)
+  (general-define-key
+   "C-z" 'undo-fu-only-undo
+   "C-S-z" 'undo-fu-only-redo)
 #+end_src
-*** Local
-**** Org-mode
-#+begin_src emacs-lisp :tangle no
+**** Navigation
+#+begin_src emacs-lisp
+  (my-leader-def
+   :keymaps 'global
+   "w" '(:ignore t :which-key "+Windows")
+   "wu" 'windmove-up
+   "we" 'windmove-down
+   "wn" 'windmove-right
+   "wi" 'windmove-left
+   "wo" 'ace-delete-window
+   "wh" 'split-window-below
+   "wv" 'split-window-right)
+#+end_src
+*** Org-mode local keymaps
+#+begin_src emacs-lisp
   (my-local-leader-def
-    :states '(normal visual motion)
     :keymaps 'org-mode-map
-    "y" 'org-store-link
-    "p" 'org-insert-link
-    "o" '(:ignore t :which-key "clock prefix")
-    "oi" 'org-clock-in
-    "oo" 'org-clock-out
-    "ol" 'org-clock-in-last
-    "or" 'org-clock-in-resume
-    )
-#+end_src
-**** Org-capture
-#+begin_src emacs-lisp :tangle no
-  (general-define-key
-   :keymaps 'org-capture-mode-map
-   [remap evil-save-and-close]          'org-capture-finalize
-   [remap evil-save-modified-and-close] 'org-capture-finalize
-   [remap evil-quit]                    'org-capture-kill)
-
-  (general-define-key
-   :states 'normal
-   :keymaps 'org-capture-mode-map
-   "RET" "C-c C-c"
-   "SPC k" '(org-capture-kill :which-key "abort capture"))
+    "y"  'org-store-link
+    "p"  'org-insert-link
+    "c"  '(:ignore t :which-key "+Clock")
+    "ci" 'org-clock-in
+    "cI" 'org-clock-in-last
+    "co" 'org-clock-out)
 #+end_src
 * Helper functions
-** Save and navigate back and forth when save
-  #+begin_src emacs-lisp
-  (defun my-pop-local-mark-ring ()
-    (interactive)
-    (set-mark-command t))
-
-  (defun unpop-to-mark-command ()
-    "Unpop off mark ring. Does nothing if mark ring is empty."
-    (interactive)
-        (when mark-ring
-          (setq mark-ring (cons (copy-marker (mark-marker)) mark-ring))
-          (set-marker (mark-marker) (car (last mark-ring)) (current-buffer))
-          (when (null (mark t)) (ding))
-          (setq mark-ring (nbutlast mark-ring))
-          (goto-char (marker-position (car (last mark-ring))))))
-#+end_src
-** Org-mode helper function
-
-#+BEGIN_SRC emacs-lisp :tangle yes
-(defun bh/is-project-p ()
-  "Any task with a todo keyword subtask"
-  (save-restriction
-    (widen)
-    (let ((has-subtask)
-          (subtree-end (save-excursion (org-end-of-subtree t)))
-          (is-a-task (member (nth 2 (org-heading-components)) org-todo-keywords-1)))
-      (save-excursion
-        (forward-line 1)
-        (while (and (not has-subtask)
-                    (< (point) subtree-end)
-                    (re-search-forward "^\*+ " subtree-end t))
-          (when (member (org-get-todo-state) org-todo-keywords-1)
-            (setq has-subtask t))))
-      (and is-a-task has-subtask))))
-
-(defun bh/find-project-task ()
-  "Move point to the parent (project) task if any"
-  (save-restriction
-    (widen)
-    (let ((parent-task (save-excursion (org-back-to-heading 'invisible-ok) (point))))
-      (while (org-up-heading-safe)
-        (when (member (nth 2 (org-heading-components)) org-todo-keywords-1)
-          (setq parent-task (point))))
-      (goto-char parent-task)
-      parent-task)))
-
-(defun bh/skip-non-tasks ()
-  "Show non-project tasks.
-Skip project and sub-project tasks, habits, and project related tasks."
-  (save-restriction
-    (widen)
-    (let ((next-headline (save-excursion (or (outline-next-heading) (point-max)))))
-      (cond
-       ((bh/is-task-p)
-        nil)
-       (t
-        next-headline)))))
-
-(defun bh/skip-project-tasks ()
-  "Show non-project tasks.
-Skip project and sub-project tasks, habits, and project related tasks."
-  (save-restriction
-    (widen)
-    (let* ((subtree-end (save-excursion (org-end-of-subtree t))))
-      (cond
-       ((bh/is-project-p)
-        subtree-end)
-       ((org-is-habit-p)
-        subtree-end)
-       ((bh/is-project-subtree-p)
-        subtree-end)
-       (t
-        nil)))))
-
-(defun bh/is-task-p ()
-  "Any task with a todo keyword and no subtask"
-  (save-restriction
-    (widen)
-    (let ((has-subtask)
-          (subtree-end (save-excursion (org-end-of-subtree t)))
-          (is-a-task (member (nth 2 (org-heading-components)) org-todo-keywords-1)))
-      (save-excursion
-        (forward-line 1)
-        (while (and (not has-subtask)
-                    (< (point) subtree-end)
-                    (re-search-forward "^\*+ " subtree-end t))
-          (when (member (org-get-todo-state) org-todo-keywords-1)
-            (setq has-subtask t))))
-      (and is-a-task (not has-subtask)))))
-
-(defun bh/is-project-subtree-p ()
-  "Any task with a todo keyword that is in a project subtree.
-Callers of this function already widen the buffer view."
-  (let ((task (save-excursion (org-back-to-heading 'invisible-ok)
-                              (point))))
-    (save-excursion
-      (bh/find-project-task)
-      (if (equal (point) task)
-          nil
-        t))))
-
-
-(defun bh/skip-non-project-tasks ()
-  "Show project tasks.
-Skip project and sub-project tasks, habits, and loose non-project tasks."
-  (save-restriction
-    (widen)
-    (let* ((subtree-end (save-excursion (org-end-of-subtree t)))
-           (next-headline (save-excursion (or (outline-next-heading) (point-max)))))
-      (cond
-       ((bh/is-project-p)
-        next-headline)
-       ((org-is-habit-p)
-        subtree-end)
-       ((and (bh/is-project-subtree-p)
-             (member (org-get-todo-state) (list "NEXT")))
-        subtree-end)
-       ((not (bh/is-project-subtree-p))
-        subtree-end)
-       (t
-        nil)))))
-#+END_SRC
-
-** Convert Transformer task to Design name
-#+begin_src emacs-lisp
-  (defun print-prop ()
-    (let* ((props (org-entry-properties))
-           (tap (cdr (assoc '"TAPCHANGER" props)))
-           (mva (cdr (assoc '"MVA" props)))
-           (hv (cdr (assoc '"HV" props)))
-           (lv (cdr (assoc '"LV" props)))
-           (tv (cdr (assoc '"TV" props)))
-           (tapping (cdr (assoc '"TAPPING" props)))
-           (name (cdr (assoc '"ITEM" props)))
-           (vector (cdr (assoc '"VECTOR" props)))
-           (cooling (cdr (assoc '"COOLING" props)))
-           (str (concat "VT" name "-" hv " " tapping
-                        "-" lv
-                        "-" tv
-                        "-" vector
-                        "-" tap
-                        "-" cooling)))
-      (insert str)
-    ))
-#+end_src
 ** Find book and open it with org noter 
 #+begin_src emacs-lisp
   (defun my-findbook-counsel-fzf ()
@@ -845,19 +409,7 @@ Skip project and sub-project tasks, habits, and loose non-project tasks."
     (let ((counsel-fzf-cmd "find ~/Dropbox/Calibre | grep -E \"(*.pdf)\" | fzf -f \"%s\" "))
     (counsel-fzf)))
 #+end_src
-#+begin_src emacs-lisp
-  (defun hai/create-file-tender (filename)
-    (if (file-exists-p filename)
-        (find-file filename)
-      (org-store-link nil t)
-      (find-file filename)
-      (goto-char (point-max))
-      (newline)
-      (org-insert-link nil (car (car org-stored-links)) "Link to Task")
-      )    
-    )
-#+end_src
-** New command
+** Copy-line
 #+begin_src emacs-lisp
     (defun copy-line (arg)
       "Copy lines (as many as prefix argument) in the kill ring.
