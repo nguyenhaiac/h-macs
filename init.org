@@ -76,7 +76,7 @@ Tangle
   (setq
    cursor-in-non-selected-windows t  ; Hide the cursor in inactive windows
    inhibit-splash-screen t
-   default-frame-alist '((font . "Fira Code-10"))
+   default-frame-alist '((font . "Inconsolata-10"))
    echo-keystrokes 0.1               ; Show keystrokes right away, don't show the message in the scratch buffe
    initial-scratch-message nil       ; Empty scratch buffer
    initial-major-mode 'org-mode      ; org mode by default
@@ -120,7 +120,7 @@ Tangle
 #+begin_src emacs-lisp :tangle yes
   (use-package kaolin-themes
     :config
-    (load-theme 'doom-solarized-dark))
+    (load-theme 'doom-one))
 #+end_src
 ** Smart-mode-line
 #+begin_src emacs-lisp :tangle no
@@ -146,6 +146,10 @@ Tangle
           doom-modeline-project-detection 'project))
 #+end_src
 * Utilities setup
+** SICP Book
+#+begin_src emacs-lisp
+  (use-package sicp)
+#+end_src
 ** Org-download
 #+begin_src emacs-lisp
   (use-package org-download
