@@ -146,6 +146,26 @@ Tangle
           doom-modeline-project-detection 'project))
 #+end_src
 * Utilities setup
+** Geiser
+#+begin_src emacs-lisp
+  (use-package geiser)
+#+end_src
+** org-source code
+#+begin_src emacs-lisp
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '(
+     (scheme . t)))
+#+end_src
+** Org-pomodoro
+#+begin_src emacs-lisp
+  (use-package sound-wav)
+  (use-package org-pomodoro
+    :config
+    (setq org-pomodoro-length 1
+          org-pomodoro-short-break-length 5
+          org-pomodoro-long-break-length 10))
+#+end_src
 ** SICP Book
 #+begin_src emacs-lisp
   (use-package sicp)
@@ -481,6 +501,21 @@ Tangle
    "H-b" 'org-backward-heading-same-level
    "H-f" 'org-forward-heading-same-level
    "H-u" 'outline-up-heading)
+#+end_src
+** Smartparens
+#+begin_src emacs-lisp
+  (general-define-key
+   "C-M-f" 'sp-forward-sexp
+   "C-M-b" 'sp-backward-sexp
+   "C-M-d" 'sp-down-sexp
+   "C-M-k" 'sp-kill-sexp
+   "C-M-w" 'sp-copy-sexp
+   "M-<delete>" 'sp-unwrap-sexp
+   "M-<backspace>" 'sp-backward-unwrap-sexp
+   "C-M-t" 'sp-transpose-sexp
+   "H-(" 'sp-wrap-round
+   "H-{" 'sp-wrap-curly
+   "H-[" 'sp-wrap-square)
 #+end_src
 * Helper functions
 ** Find book and open it with org noter 
