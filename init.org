@@ -146,6 +146,13 @@ Tangle
           doom-modeline-project-detection 'project))
 #+end_src
 * Utilities setup
+** Winnum mode
+#+begin_src emacs-lisp
+  (use-package winum
+    :config
+    (winum-mode)
+    (winum-set-keymap-prefix (kbd "C-c")))
+#+end_src
 ** Geiser
 #+begin_src emacs-lisp
   (use-package geiser)
@@ -156,15 +163,6 @@ Tangle
    'org-babel-load-languages
    '(
      (scheme . t)))
-#+end_src
-** Org-pomodoro
-#+begin_src emacs-lisp
-  (use-package sound-wav)
-  (use-package org-pomodoro
-    :config
-    (setq org-pomodoro-length 1
-          org-pomodoro-short-break-length 5
-          org-pomodoro-long-break-length 10))
 #+end_src
 ** SICP Book
 #+begin_src emacs-lisp
@@ -405,31 +403,10 @@ Tangle
 #+end_src
 ** For windows movement
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (general-define-key
-   :keymaps 'global
-   "C-x [" 'previous-buffer
-   "C-x ]" 'next-buffer
-   )
   (use-package ace-window
     :config
     (global-set-key (kbd "M-o") 'ace-window)
-    (setq aw-dispatch-always t)
-    (setq aw-keys '(?a ?r ?s ?t ?d ?h ?n ?e ?i))
-    (defvar aw-dispatch-alist
-    '((?x aw-delete-window "Delete Window")
-	  (?w aw-swap-window "Swap Windows")
-	  (?M aw-move-window "Move Window")
-	  (?c aw-copy-window "Copy Window")
-	  (?j aw-switch-buffer-in-window "Select Buffer")
-	  (?f aw-flip-window)
-	  (?u aw-switch-buffer-other-window "Switch Buffer Other Window")
-	  (?c aw-split-window-fair "Split Fair Window")
-	  (?v aw-split-window-vert "Split Vert Window")
-	  (?b aw-split-window-horz "Split Horz Window")
-	  (?o delete-other-windows "Delete Other Windows")
-	  (?? aw-show-dispatch-help))
-    "List of actions for `aw-dispatch-default'.")
-  )
+    (setq aw-dispatch-always t))
 #+END_SRC
 ** Leader keybindings
 *** Define leader key
@@ -475,9 +452,8 @@ Tangle
    "w" '(:ignore t :which-key "+Windows")
    "wu" 'windmove-up
    "we" 'windmove-down
-   "wn" 'windmove-right
-   "wi" 'windmove-left
-   "wo" 'ace-delete-window
+   "wi" 'windmove-right
+   "wn" 'windmove-left
    "wh" 'split-window-below
    "wv" 'split-window-right)
 #+end_src
