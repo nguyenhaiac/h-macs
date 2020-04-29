@@ -1,41 +1,41 @@
-#+TITLE: Emacs configuration file
-#+AUTHOR: Nguyen Tien Hai
-#+BABEL: :cache yes
-#+PROPERTY: header-args :tangle ~/.emacs.d/init.el
-#+BEGIN_SRC emacs-lisp
+#+title: emacs configuration file
+#+author: nguyen tien hai
+#+babel: :cache yes
+#+property: header-args :tangle ~/.emacs.d/init.el
+#+begin_src emacs-lisp
 ;;; -*- lexical-binding: t -*-
-#+END_SRC
+#+end_src
 
-* Initialize the configuration
-** Tangle & byte compile
+* initialize the configuration
+** tangle & byte compile
 
-Tangle and byte compile
+tangle and byte compile
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
   (defun my--tangle-byte-compile-org ()
-   "Tangles emacs.org and byte compiles ~/.emacs.d/"
+   "tangles emacs.org and byte compiles ~/.emacs.d/"
      (interactive)
      (when (equal (buffer-name)
                   (concat "init.org"))
        (org-babel-tangle)
        (byte-recompile-directory (expand-file-name user-emacs-directory) 0)))
-#+END_SRC
+#+end_src
 
-Tangle
+tangle
 
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes
 (defun my--tangle-org ()
- "Tangles emacs.org and byte compiles ~/.emacs.d/"
+ "tangles emacs.org and byte compiles ~/.emacs.d/"
    (interactive)
    (when (equal (buffer-name)
                 (concat "init.org"))
      (org-babel-tangle)))
 (add-hook 'after-save-hook #'my--tangle-org)
 
-#+END_SRC
-** Bootstrap straight.el
-*** Install straight.el if not yet
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+end_src
+** bootstrap straight.el
+*** install straight.el if not yet
+#+begin_src emacs-lisp :tangle yes
 (defvar bootstrap-version)
 (let ((bootstrap-file
        (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
@@ -48,18 +48,20 @@ Tangle
       (goto-char (point-max))
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
-#+END_SRC
-*** Install use-package and set it to use straight by default
-#+BEGIN_SRC emacs-lisp :tangle yes
+#+end_src
+*** install use-package and set it to use straight by default
+#+begin_src emacs-lisp :tangle yes
 (straight-use-package 'use-package)
 (setq straight-use-package-by-default t)
 (straight-use-package 'org-plus-contrib)
-#+END_SRC
+#+end_src
 
-** Better-default 
+** better-default 
 #+begin_src emacs-lisp
+  (modify-syntax-entry ?_ "w")
+  (setq org-src-window-setup 'split-window-below)
   (setq w32-pass-apps-to-system nil)
-  (setq w32-apps-modifier 'hyper) ; Menu/App key
+  (setq w32-apps-modifier 'hyper) ; menu/app key
   (ido-mode nil)
   (use-package gcmh
     :config
@@ -74,17 +76,16 @@ Tangle
   (global-auto-revert-mode t)
   (fset 'yes-or-no-p 'y-or-n-p)
   (setq
-   cursor-in-non-selected-windows t  ; Hide the cursor in inactive windows
+   cursor-in-non-selected-windows t  ; hide the cursor in inactive windows
    inhibit-splash-screen t
-   default-frame-alist '((font . "Inconsolata-10"))
-   echo-keystrokes 0.1               ; Show keystrokes right away, don't show the message in the scratch buffe
-   initial-scratch-message nil       ; Empty scratch buffer
+   default-frame-alist '((font . "caskaydiacove nerd font-10"))
+   echo-keystrokes 0.1               ; show keystrokes right away, don't show the message in the scratch buffe
+   initial-scratch-message nil       ; empty scratch buffer
    initial-major-mode 'org-mode      ; org mode by default
    custom-safe-themes t
    confirm-kill-emacs 'y-or-n-p      ; y and n instead of yes and no when quitting
    )
-  (add-hook 'org-mode-hook 'visual-line-mode)
-  (set-default 'truncate-lines nil)
+  (setq-default global-visual-line-mode)
   (ido-mode nil)
   (add-hook 'org-mode-hook 'hl-line-mode)
   (setq line-spacing 0.15)
@@ -93,23 +94,28 @@ Tangle
     (setq right-margin-width 2)
     (set-window-buffer nil (current-buffer))))
   (setq org-tags-column 100)
+  (set-frame-parameter (selected-frame) 'alpha '(92 92))
+  (add-to-list 'default-frame-alist '(alpha 92 92))
+  (defun my-org-confirm-babel-evaluate (lang body)
+    (not (string= lang "scheme")))
+  (setq org-confirm-babel-evaluate #'my-org-confirm-babel-evaluate)
 #+end_src
-** Detect system
+** detect system
 #+begin_src emacs-lisp
-  ;; Check if system is Microsoft Windows
+  ;; check if system is microsoft windows
   (defun my-system-type-is-windows ()
-    "Return true if system is Windows-based (at least up to Win7)"
+    "return true if system is windows-based (at least up to win7)"
     (string-equal system-type "windows-nt")
     )
 
-  ;; Check if system is GNU/Linux
+  ;; check if system is gnu/linux
   (defun my-system-type-is-gnu ()
-    "Return true if system is GNU/Linux-based"
+    "return true if system is gnu/linux-based"
     (string-equal system-type "gnu/linux")
     )
 #+end_src
-* Aesthetic improvement
-** Doom themes
+* aesthetic improvement
+** doom themes
 #+begin_src emacs-lisp :tangle yes
   (use-package doom-themes
     :config
@@ -120,22 +126,22 @@ Tangle
 #+begin_src emacs-lisp :tangle yes
   (use-package kaolin-themes
     :config
-    (load-theme 'doom-one))
+    (load-theme 'kaolin-ocean))
 #+end_src
-** Smart-mode-line
+** smart-mode-line
 #+begin_src emacs-lisp :tangle no
   (use-package smart-mode-line-atom-one-dark-theme)
   (use-package smart-mode-line
     :config
     (setq sml/theme 'respectful)
     (sml/setup)
-    (add-to-list 'sml/replacer-regexp-list '("^~/Dropbox/" ":DBox:")))
+    (add-to-list 'sml/replacer-regexp-list '("^~/dropbox/" ":dbox:")))
 #+end_src
-** Material theme
+** material theme
 #+begin_src emacs-lisp
   (use-package flatland-theme)
 #+end_src
-** Doom-modeline
+** doom-modeline
 #+begin_src emacs-lisp
   (use-package doom-modeline
     :ensure t
@@ -145,17 +151,115 @@ Tangle
           doom-modeline-env-enable-python t
           doom-modeline-project-detection 'project))
 #+end_src
-* Utilities setup
-** Winnum mode
+** rainbow-mode
+#+begin_src emacs-lisp
+  (use-package rainbow-mode)
+#+end_src
+* utilities setup
+** evil
+#+begin_src emacs-lisp :tangle no
+  (use-package evil
+    :init
+    (setq evil-disable-insert-state-bindings t
+          evil-want-C-i-jump t
+          evil-want-C-u-scroll t
+          evil-want-integration t
+          evil-want-keybinding nil)
+    :config
+    (evil-mode t))
+#+end_src
+
+#+RESULTS:
+: t
+
+** Corral
+#+begin_src emacs-lisp
+  (use-package corral
+    :config
+    (global-set-key (kbd "M-9") 'corral-parentheses-backward)
+    (global-set-key (kbd "M-0") 'corral-parentheses-forward)
+    (global-set-key (kbd "M-[") 'corral-brackets-backward)
+    (global-set-key (kbd "M-]") 'corral-brackets-forward)
+    (global-set-key (kbd "M-{") 'corral-braces-backward)
+    (global-set-key (kbd "M-}") 'corral-braces-forward)
+    (global-set-key (kbd "M-\"") 'corral-double-quotes-backward))
+#+end_src
+** lispy
+#+begin_src emacs-lisp :tangle yes
+  (use-package lispy
+    :config
+    (add-hook 'emacs-lisp-mode-hook (lambda () (lispy-mode 1)))
+    (add-hook 'scheme-mode-hook (lambda () (lispy-mode 1))))
+#+end_src
+** org-pomodoro
+   :logbook:
+   clock: [2020-03-30 mon 15:26]--[2020-03-30 mon 15:27] =>  0:01
+   clock: [2020-03-30 mon 15:25]--[2020-03-30 mon 15:26] =>  0:01
+   :end:
+#+begin_src emacs-lisp
+  (use-package org-pomodoro
+    :config
+    (setq org-pomodoro-length 30))
+  (defun my/org-pomodoro-text-time ()
+    "return status info about org-pomodoro and if org-pomodoro is not running, try to print info about org-clock.
+      if either org-pomodoro or org-clock aren't active, print \"no active task \" "
+    (interactive)
+    (cond ((equal :none org-pomodoro-state)
+           (if (org-clock-is-active)
+               (format "clocked task: %d minutes - %s"
+                       (org-clock-get-clocked-time) (substring-no-properties org-clock-heading)
+                       "no active task")))
+          ((equal :pomodoro org-pomodoro-state)
+           (format "%d - pomodoro: %d minutes - %s"
+                   org-pomodoro-count (/ (org-pomodoro-remaining-seconds) 60) (substring-no-properties org-clock-heading)))
+          ((equal :short-break org-pomodoro-state) "short break")
+          ((equal :long-break org-pomodoro-state)  "long break")))
+#+end_src
+
+** Acewindows
+#+begin_src emacs-lisp
+  (use-package ace-window
+    :init
+    (setq aw-background t)
+    (setq aw-keys '(?a ?r ?s ?t ?d ?h ?n ?e ?i))
+    (setq aw-dispatch-always t))
+  (defvar aw-dispatch-alist
+    '((?x aw-delete-window "Delete Window")
+          (?m aw-swap-window "Swap Windows")
+          (?M aw-move-window "Move Window")
+          (?c aw-copy-window "Copy Window")
+          (?j aw-switch-buffer-in-window "Select Buffer")
+          (?l aw-flip-window)
+          (?u aw-switch-buffer-other-window "Switch Buffer Other Window")
+          (?k aw-split-window-fair "Split Fair Window")
+          (?v aw-split-window-vert "Split Vert Window")
+          (?b aw-split-window-horz "Split Horz Window")
+          (?o delete-other-windows "Delete Other Windows")
+          (?? aw-show-dispatch-help))
+    "List of actions for `aw-dispatch-default'.")
+  (global-set-key (kbd "M-o") 'ace-window)
+#+end_src
+** winnum mode
 #+begin_src emacs-lisp
   (use-package winum
     :config
     (winum-mode)
     (winum-set-keymap-prefix (kbd "C-c")))
 #+end_src
-** Geiser
+** geiser
+#+begin_src emacs-lisp :tangle yes
+  (use-package geiser
+    :config
+    (setq geiser-active-implementations '(guile))
+    )
+#+end_src
+** Info node
 #+begin_src emacs-lisp
-  (use-package geiser)
+  (use-package info+)
+#+end_src
+** Bookmark plus
+#+begin_src emacs-lisp
+  (use-package bookmark+)
 #+end_src
 ** org-source code
 #+begin_src emacs-lisp
@@ -164,25 +268,11 @@ Tangle
    '(
      (scheme . t)))
 #+end_src
-** SICP Book
+** sicp book
 #+begin_src emacs-lisp
   (use-package sicp)
 #+end_src
-** Org-download
-#+begin_src emacs-lisp
-  (use-package org-download
-    :after org
-    :bind
-    (:map org-mode-map
-          (("H-Y" . org-download-screenshot)
-           ("H-y" . org-download-yank))))
-  (when (my-system-type-is-windows)
-    (setq org-download-screenshot-method "magick convert clipboard: %s")
-    (setq-default org-download-image-dir "~/Dropbox/brain/images")
-    )
-#+end_src
-
-** Hyperbole
+** hyperbole
 #+begin_src emacs-lisp
   (use-package hyperbole)
 #+end_src
@@ -202,7 +292,7 @@ Tangle
     (counsel-mode 1))
   (use-package avy)
 #+end_src
-** Autocompletion with company-mode
+** autocompletion with company-mode
 #+begin_src emacs-lisp
   (use-package company
       :config
@@ -210,46 +300,47 @@ Tangle
             company-minimum-prefix-length 1)
       (global-company-mode))
 #+end_src
-** Whichkey
+** whichkey
 #+begin_src emacs-lisp
   (use-package which-key
     :config
     (which-key-mode))
 #+end_src
-** Smartparens
+** smartparens
 #+begin_src emacs-lisp
   (use-package smartparens
     :config
-    (smartparens-global-mode))
+    (smartparens-global-mode)
+    (require 'smartparens-config))
 #+end_src
-** Org-bullets
+** org-bullets
 #+begin_src emacs-lisp
   (use-package org-bullets
     :config
     (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
 #+end_src
-** Undo-fu
+** undo-fu
 #+begin_src emacs-lisp
   (use-package undo-fu)
 #+end_src
 
-** Deadgrep
+** deadgrep
 #+begin_src emacs-lisp
   (use-package deadgrep)
 #+end_src
-** Org-mode GTD
-*** Settings
+** org-mode gtd
+*** settings
 #+begin_src emacs-lisp
   (require 'org-habit)
-  (setq org-agenda-files (list "~/Dropbox/orggtd/todo.org"
-                               "~/Dropbox/orggtd/mobile.org"
-                               "~/Onedrive - ABB/tender.org"
-                               "~/Dropbox/orggtd/emacs-bindings.org"))
-  (setq org-refile-files (list "~/Dropbox/orggtd/todo.org"
-                               "~/Dropbox/orggtd/mobile.org"
-                               "~/Onedrive - ABB/tender.org"
-                               "~/Dropbox/orggtd/someday.org"
-                               "~/Dropbox/orggtd/references.org"))
+  (setq org-agenda-files (list "~/dropbox/orggtd/todo.org"
+                               "~/dropbox/orggtd/mobile.org"
+                               "~/onedrive - abb/tender.org"
+                               "~/dropbox/orggtd/emacs-bindings.org"))
+  (setq org-refile-files (list "~/dropbox/orggtd/todo.org"
+                               "~/dropbox/orggtd/mobile.org"
+                               "~/onedrive - abb/tender.org"
+                               "~/dropbox/orggtd/someday.org"
+                               "~/dropbox/orggtd/references.org"))
   (setq spacemacs-theme-org-agenda-height nil
         org-agenda-start-day "-1d"
         org-agenda-skip-scheduled-if-done t
@@ -268,36 +359,36 @@ Tangle
         org-clock-out-when-done t
         org-clock-persist t)
 #+end_src
-*** Org-todo keywords
+*** org-todo keywords
 #+begin_src emacs-lisp
   (setq org-todo-keyword-faces
-        '(("TODO" . org-warning)
-          ("STRT" . "yellow")
-          ("NEXT" . "orange")
-          ("WAIT" . "gray")
-          ("TOREAD" . "green")
-          ("CANCELED" . (:foreground "blue" :weight bold))))
+        '(("todo" . org-warning)
+          ("strt" . "yellow")
+          ("next" . "orange")
+          ("wait" . "gray")
+          ("toread" . "green")
+          ("canceled" . (:foreground "blue" :weight bold))))
   (setq org-todo-keywords
         '((sequence
-           "TODO(t)"  ; A task that needs doing & is ready to do
-           "NEXT(n)"
-           "STRT(s)"  ; A task that is in progress
-           "WAIT(w)"  ; Something is holding up this task; or it is paused
-           "TOREAD(r)"
+           "todo(t)"  ; a task that needs doing & is ready to do
+           "next(n)"
+           "strt(s)"  ; a task that is in progress
+           "wait(w)"  ; something is holding up this task; or it is paused
+           "toread(r)"
            "|"
-           "DONE(d)"  ; Task successfully completed
-           "PHONE(p)"
-           "READ(R)"
-           "MEETING(m)"
-           "KILL(k)")))
+           "done(d)"  ; task successfully completed
+           "phone(p)"
+           "read(r)"
+           "meeting(m)"
+           "kill(k)")))
 #+end_src
-** Deft and zetteldeft
+** deft and zetteldeft
 #+begin_src emacs-lisp
   (use-package deft
     :init
     (setq deft-extensions '("org" "md")
           deft-recursive t
-          deft-directory "~/Dropbox/Archives"
+          deft-directory "~/dropbox/archives"
           deft-use-filename-as-title t
           deft-file-naming-rules '((noslash . "-")
                                    (nospace . "-")
@@ -305,14 +396,14 @@ Tangle
   (use-package zetteldeft
     :after deft)
 #+end_src
-* Programming setup
-** Projectile
+* programming setup
+** projectile
 #+begin_src emacs-lisp
   (use-package projectile
     :config
     (projectile-mode 1))
 #+end_src
-** Emmet-mode
+** emmet-mode
 #+begin_src emacs-lisp
   (use-package emmet-mode
     :config
@@ -320,7 +411,7 @@ Tangle
     (add-hook 'css-mode-hook 'emmet-mode)
     (setq emmet-self-closing-tag-style " /"))
 #+end_src
-** Webmode
+** webmode
 #+begin_src emacs-lisp
   (use-package web-mode
     :config
@@ -328,26 +419,26 @@ Tangle
     (setq web-mode-engines-alist '(("django" . "\\.html\\'")))
     (setq web-mode-enable-auto-pairing nil))
 #+end_src
-** Magit - the king of git
+** magit - the king of git
 #+begin_src emacs-lisp :tangle yes
  (use-package magit)
-#+END_SRC
-** Python with elpy
+#+end_src
+** python with elpy
 #+begin_src emacs-lisp :tangle yes
   (use-package elpy
     :if (my-system-type-is-windows)
     :config
     (elpy-enable))
-#+END_SRC
-** Blacken
+#+end_src
+** blacken
 #+begin_src emacs-lisp
   (use-package blacken)
 #+end_src
-** Python debugging with realgud
+** python debugging with realgud
 #+begin_src emacs-lisp :tangle yes
   (use-package realgud)
-#+END_SRC
-** Python with lsp mode
+#+end_src
+** python with lsp mode
 #+begin_src emacs-lisp :tangle yes
   (use-package lsp-mode
     :if (my-system-type-is-gnu)
@@ -362,7 +453,7 @@ Tangle
 #+begin_src emacs-lisp :tangle yes
   (use-package pyvenv)
 #+end_src
-** C programming setup
+** c programming setup
 #+begin_src emacs-lisp :tangle yes
   (use-package company-irony
     :config
@@ -396,120 +487,23 @@ Tangle
 #+begin_src emacs-lisp :tangle yes
   (use-package yaml-mode)
 #+end_src
-* Keybindings for specific modes
-** Install general
-#+begin_src emacs-lisp
-  (use-package general)
-#+end_src
-** For windows movement
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package ace-window
-    :config
-    (global-set-key (kbd "M-o") 'ace-window)
-    (setq aw-dispatch-always t))
-#+END_SRC
-** Leader keybindings
-*** Define leader key
-#+begin_src emacs-lisp :tangle yes
-  (general-create-definer my-leader-def
-    :prefix "C-c")
-  (general-create-definer my-local-leader-def
-    :prefix "C-c m")
-#+end_src
-*** General leader keybindings
-**** General keybindings
-#+begin_src emacs-lisp
-  (my-leader-def
-    "a" 'org-agenda
-    "c" 'org-capture
-    "r" 'deadgrep
-    "d" '(:ignore t :which-key "Deft")
-    "dd" 'deft
-    "dn" 'zetteldeft-new-file
-    "dr" 'deft-refresh
-    "ds" 'zetteldeft-search-at-point
-    "dc" 'zetteldeft-search-current-id
-    "df" 'zetteldeft-follow-link
-    "dF" 'zetteldeft-avy-file-search-ace-window
-    "dl" 'zetteldeft-avy-link-search
-    "dt" 'zetteldeft-avy-tag-search
-    "dT" 'zetteldeft-tag-buffer
-    "di" 'zetteldeft-find-file-id-insert
-    "dI" 'zetteldeft-find-file-full-title-insert
-    "do" 'zetteldeft-find-file
-    "dn" 'zetteldeft-new-file
-    "dN" 'zetteldeft-new-file-and-link
-    "dr" 'zetteldeft-file-rename
-    "dx" 'zetteldeft-count-words)
-  (general-define-key
-   "C-z" 'undo-fu-only-undo
-   "C-S-z" 'undo-fu-only-redo)
-#+end_src
-**** Navigation
-#+begin_src emacs-lisp
-  (my-leader-def
-   :keymaps 'global
-   "w" '(:ignore t :which-key "+Windows")
-   "wu" 'windmove-up
-   "we" 'windmove-down
-   "wi" 'windmove-right
-   "wn" 'windmove-left
-   "wh" 'split-window-below
-   "wv" 'split-window-right)
-#+end_src
-*** Org-mode local keymaps
-#+begin_src emacs-lisp
-  (my-local-leader-def
-    :keymaps 'org-mode-map
-    "y"  'org-store-link
-    "p"  'org-insert-link
-    "c"  '(:ignore t :which-key "+Clock")
-    "ci" 'org-clock-in
-    "cI" 'org-clock-in-last
-    "co" 'org-clock-out)
-#+end_src
-*** Org-mode navigation
-#+begin_src emacs-lisp
-  (general-define-key
-   :keymaps 'org-mode-map
-   "H-n" 'outline-next-visible-heading
-   "H-p" 'outline-previous-visible-heading
-   "H-b" 'org-backward-heading-same-level
-   "H-f" 'org-forward-heading-same-level
-   "H-u" 'outline-up-heading)
-#+end_src
-** Smartparens
-#+begin_src emacs-lisp
-  (general-define-key
-   "C-M-f" 'sp-forward-sexp
-   "C-M-b" 'sp-backward-sexp
-   "C-M-d" 'sp-down-sexp
-   "C-M-k" 'sp-kill-sexp
-   "C-M-w" 'sp-copy-sexp
-   "M-<delete>" 'sp-unwrap-sexp
-   "M-<backspace>" 'sp-backward-unwrap-sexp
-   "C-M-t" 'sp-transpose-sexp
-   "H-(" 'sp-wrap-round
-   "H-{" 'sp-wrap-curly
-   "H-[" 'sp-wrap-square)
-#+end_src
-* Helper functions
-** Find book and open it with org noter 
+* helper functions
+** find book and open it with org noter 
 #+begin_src emacs-lisp
   (defun my-findbook-counsel-fzf ()
       (interactive)
-    (let ((counsel-fzf-cmd "find ~/Dropbox/Calibre | grep -E \"(*.pdf)\" | fzf -f \"%s\" "))
+    (let ((counsel-fzf-cmd "find ~/dropbox/calibre | grep -e \"(*.pdf)\" | fzf -f \"%s\" "))
     (counsel-fzf)))
 #+end_src
-** Copy-line
+** copy-line
 #+begin_src emacs-lisp
     (defun copy-line (arg)
-      "Copy lines (as many as prefix argument) in the kill ring.
-        Ease of use features:
-        - Move to start of next line.
-        - Appends the copy on sequential calls.
-        - Use newline as last char even on the last line of the buffer.
-        - If region is active, copy its lines."
+      "copy lines (as many as prefix argument) in the kill ring.
+        ease of use features:
+        - move to start of next line.
+        - appends the copy on sequential calls.
+        - use newline as last char even on the last line of the buffer.
+        - if region is active, copy its lines."
       (interactive "p")
       (let ((beg (line-beginning-position))
             (end (line-end-position arg)))
@@ -524,3 +518,69 @@ Tangle
       (beginning-of-line (or (and arg (1+ arg)) 2))
       (if (and arg (not (= 1 arg))) (message "%d lines copied" arg)))
 #+end_src
+* Keybindings
+#+begin_src emacs-lisp
+  (use-package general)
+  ;  (general-evil-setup)
+  (general-define-key "<menu>" (general-simulate-key "C-c"))
+  (general-define-key
+   "C-z" 'undo-fu-only-undo
+   "C-s-z" 'undo-fu-only-redo)
+  (general-define-key
+   "H-t" 'vterm-toggle)
+  (use-package key-chord :config (key-chord-mode t))
+  (general-define-key
+   :keymap org-mode-map
+   "H-i" 'org-pomodoro)
+  (defun def-rep-command (alist)
+    "Return a lambda that calls the first function of ALIST. It sets the transient map to all functions of ALIST, allowing you to repeat those functions as needed."
+    (lexical-let ((keymap (make-sparse-keymap))
+                  (func (cdar alist)))
+      (mapc (lambda (x)
+              (when x
+                (define-key keymap (kbd (car x)) (cdr x))))
+            alist)
+      (lambda (arg)
+        (interactive "p")
+        (when func
+          (funcall func arg))
+        (set-transient-map keymap t))))
+  (key-chord-define-global "yy"   
+        (def-rep-command
+         '(nil
+           ("n" . windmove-left)
+           ("i" . windmove-right)
+           ("e" . windmove-down)
+           ("u" . windmove-up)
+           ("y" . other-window)
+           ("h" . ace-window)
+           ("s" . (lambda () (interactive) (ace-window 4)))
+           ("d" . (lambda () (interactive) (ace-window 16)))
+           )))
+  (key-chord-define-global "hh"   
+        (def-rep-command
+         '(nil
+           ("-" . text-scale-decrease)
+           ("=" . text-scale-increase)
+           )))
+  (general-define-key
+   :prefix "C-c"
+   "c" 'avy-goto-char-timer
+   "w" 'avy-goto-word-0
+   )
+
+
+  (general-define-key
+   :keymaps 'lispy-mode-map
+   "u" 'special-lispy-up
+   "e" 'special-lispy-down
+   "n" 'special-lispy-left
+   "i" 'special-lispy-right
+   "k" 'special-lispy-undo
+   "j" 'special-lispy-eval
+   "l" 'special-lispy-tab
+   "h" 'special-lispy-new-copy)
+#+end_src
+
+#+RESULTS:
+
