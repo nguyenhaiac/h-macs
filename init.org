@@ -99,6 +99,11 @@ tangle
   (defun my-org-confirm-babel-evaluate (lang body)
     (not (string= lang "scheme")))
   (setq org-confirm-babel-evaluate #'my-org-confirm-babel-evaluate)
+  (defun my/disable-scroll-bars (frame)
+    (modify-frame-parameters frame
+                             '((vertical-scroll-bars . nil)
+                               (horizontal-scroll-bars . nil))))
+  (add-hook 'after-make-frame-functions 'my/disable-scroll-bars)
 #+end_src
 ** detect system
 #+begin_src emacs-lisp
@@ -156,6 +161,26 @@ tangle
   (use-package rainbow-mode)
 #+end_src
 * utilities setup
+** Org-roam
+#+begin_src emacs-lisp
+  (use-package org-roam
+    :hook 
+    (after-init . org-roam-mode)
+    :custom
+    (org-roam-directory "~/Dropbox/brain")
+    (org-roam-graph-executable "/usr/bin/dot")
+    :bind (:map org-roam-mode-map
+                (("C-c n l" . org-roam)
+                 ("C-c n f" . org-roam-find-file)
+                 ("C-c n g" . org-roam-show-graph))
+                :map org-mode-map
+                (("C-c n i" . org-roam-insert)
+                 ("C-c n c" . org-roam-capture))))
+  (use-package company-org-roam
+    :straight (:host github :repo "jethrokuan/company-org-roam")
+    :config
+    (push 'company-org-roam company-backends))
+#+end_src
 ** evil
 #+begin_src emacs-lisp :tangle no
   (use-package evil
