@@ -57,6 +57,12 @@ tangle
 #+end_src
 
 ** better-default 
+#+begin_src emacs-lisp :tangle ~/.emacs.d/early-init.el
+  (setq
+   default-frame-alist '((font . "caskaydiacove nerd font-10"))
+   tool-bar-mode nil
+   menu-bar-mode nil)
+#+end_src
 #+begin_src emacs-lisp
   (modify-syntax-entry ?_ "w")
   (setq org-src-window-setup 'split-window-below)
@@ -78,7 +84,6 @@ tangle
   (setq
    cursor-in-non-selected-windows t  ; hide the cursor in inactive windows
    inhibit-splash-screen t
-   default-frame-alist '((font . "caskaydiacove nerd font-10"))
    echo-keystrokes 0.1               ; show keystrokes right away, don't show the message in the scratch buffe
    initial-scratch-message nil       ; empty scratch buffer
    initial-major-mode 'org-mode      ; org mode by default
@@ -277,10 +282,6 @@ tangle
     :config
     (setq geiser-active-implementations '(guile))
     )
-#+end_src
-** Info node
-#+begin_src emacs-lisp
-  (use-package info+)
 #+end_src
 ** Bookmark plus
 #+begin_src emacs-lisp
