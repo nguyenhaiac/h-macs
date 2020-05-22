@@ -57,9 +57,9 @@ tangle
 #+end_src
 
 ** better-default 
-#+begin_src emacs-lisp :tangle ~/.emacs.d/early-init.el
+#+begin_src emacs-lisp
   (setq
-   default-frame-alist '((font . "caskaydiacove nerd font-10"))
+   default-frame-alist '((font . "CaskaydiaCove NF-10"))
    tool-bar-mode nil
    menu-bar-mode nil)
 #+end_src
@@ -90,17 +90,15 @@ tangle
    custom-safe-themes t
    confirm-kill-emacs 'y-or-n-p      ; y and n instead of yes and no when quitting
    )
-  (setq-default global-visual-line-mode)
   (ido-mode nil)
   (add-hook 'org-mode-hook 'hl-line-mode)
+  (add-hook 'org-mode-hook 'visual-line-mode)
   (setq line-spacing 0.15)
   (lambda () (progn
     (setq left-margin-width 2)
     (setq right-margin-width 2)
     (set-window-buffer nil (current-buffer))))
   (setq org-tags-column 100)
-  (set-frame-parameter (selected-frame) 'alpha '(92 92))
-  (add-to-list 'default-frame-alist '(alpha 92 92))
   (defun my-org-confirm-babel-evaluate (lang body)
     (not (string= lang "scheme")))
   (setq org-confirm-babel-evaluate #'my-org-confirm-babel-evaluate)
@@ -166,6 +164,30 @@ tangle
   (use-package rainbow-mode)
 #+end_src
 * utilities setup
+** pdf-tools
+   #+begin_src emacs-lisp
+     (use-package pdf-tools   
+       :config   (pdf-tools-install)   
+       (setq-default pdf-view-display-size 'fit-page))
+   #+end_src
+** Org-noter
+   #+begin_src emacs-lisp
+     (use-package org-noter)
+   #+end_src
+** anki-editor
+   #+begin_src emacs-lisp
+     (use-package anki-editor)
+     (setq request-log-level 'debug)
+   #+end_src
+** Org-download
+   #+begin_src emacs-lisp
+     (use-package org-download)
+     (setq-default org-download-image-dir "~/Dropbox/brain/image")
+     (when (my-system-type-is-windows)
+       (setq org-download-screenshot-method "magick convert clipboard: %s")
+       )
+
+   #+end_src
 ** Org-roam
 #+begin_src emacs-lisp
   (use-package org-roam
@@ -173,7 +195,6 @@ tangle
     (after-init . org-roam-mode)
     :custom
     (org-roam-directory "~/Dropbox/brain")
-    (org-roam-graph-executable "/usr/bin/dot")
     :bind (:map org-roam-mode-map
                 (("C-c n l" . org-roam)
                  ("C-c n f" . org-roam-find-file)
@@ -185,6 +206,10 @@ tangle
     :straight (:host github :repo "jethrokuan/company-org-roam")
     :config
     (push 'company-org-roam company-backends))
+  (when (my-system-type-is-gnu)
+    (setq org-roam-graph-executable "/usr/bin/dot"))
+  (when (my-system-type-is-windows)
+    (setq org-roam-graph-executable "c:/Program Files (x86)/Graphviz2.38/bin/dot"))
 #+end_src
 ** evil
 #+begin_src emacs-lisp :tangle no
@@ -221,31 +246,6 @@ tangle
     (add-hook 'emacs-lisp-mode-hook (lambda () (lispy-mode 1)))
     (add-hook 'scheme-mode-hook (lambda () (lispy-mode 1))))
 #+end_src
-** org-pomodoro
-   :logbook:
-   clock: [2020-03-30 mon 15:26]--[2020-03-30 mon 15:27] =>  0:01
-   clock: [2020-03-30 mon 15:25]--[2020-03-30 mon 15:26] =>  0:01
-   :end:
-#+begin_src emacs-lisp
-  (use-package org-pomodoro
-    :config
-    (setq org-pomodoro-length 30))
-  (defun my/org-pomodoro-text-time ()
-    "return status info about org-pomodoro and if org-pomodoro is not running, try to print info about org-clock.
-      if either org-pomodoro or org-clock aren't active, print \"no active task \" "
-    (interactive)
-    (cond ((equal :none org-pomodoro-state)
-           (if (org-clock-is-active)
-               (format "clocked task: %d minutes - %s"
-                       (org-clock-get-clocked-time) (substring-no-properties org-clock-heading)
-                       "no active task")))
-          ((equal :pomodoro org-pomodoro-state)
-           (format "%d - pomodoro: %d minutes - %s"
-                   org-pomodoro-count (/ (org-pomodoro-remaining-seconds) 60) (substring-no-properties org-clock-heading)))
-          ((equal :short-break org-pomodoro-state) "short break")
-          ((equal :long-break org-pomodoro-state)  "long break")))
-#+end_src
-
 ** Acewindows
 #+begin_src emacs-lisp
   (use-package ace-window
