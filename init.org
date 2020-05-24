@@ -164,6 +164,41 @@ tangle
   (use-package rainbow-mode)
 #+end_src
 * utilities setup
+** elfeed
+   #+begin_src emacs-lisp
+     (use-package elfeed)
+     (use-package elfeed-org)
+     (defun elfeed-play-with-mpv ()
+       "Play entry link with mpv."
+       (interactive)
+       (let ((entry (if (eq major-mode 'elfeed-show-mode) elfeed-show-entry (elfeed-search-selected :single)))
+             (quality-arg "")
+             (quality-val (completing-read "Max height resolution (0 for unlimited): " '("0" "480" "720") nil nil)))
+         (setq quality-val (string-to-number quality-val))
+         (message "Opening %s with height≤%s with mpv..." (elfeed-entry-link entry) quality-val)
+         (when (< 0 quality-val)
+           (setq quality-arg (format "--ytdl-format=[height<=?%s]" quality-val)))
+         (start-process "elfeed-mpv" nil "mpv" quality-arg (elfeed-entry-link entry))))
+
+     (defvar elfeed-mpv-patterns
+       '("youtu\\.?be")
+       "List of regexp to match against elfeed entry link to know
+     whether to use mpv to visit the link.")
+
+     (defun elfeed-visit-or-play-with-mpv ()
+       "Play in mpv if entry link matches `elfeed-mpv-patterns', visit otherwise.
+     See `elfeed-play-with-mpv'."
+       (interactive)
+       (let ((entry (if (eq major-mode 'elfeed-show-mode) elfeed-show-entry (elfeed-search-selected :single)))
+             (patterns elfeed-mpv-patterns))
+         (while (and patterns (not (string-match (car elfeed-mpv-patterns) (elfeed-entry-link entry))))
+           (setq patterns (cdr patterns)))
+         (if patterns
+             (elfeed-play-with-mpv)
+           (if (eq major-mode 'elfeed-search-mode)
+               (elfeed-search-browse-url)
+             (elfeed-show-visit))))) 
+   #+end_src
 ** pdf-tools
    #+begin_src emacs-lisp
      (use-package pdf-tools   
@@ -514,13 +549,6 @@ tangle
   (use-package yaml-mode)
 #+end_src
 * helper functions
-** find book and open it with org noter 
-#+begin_src emacs-lisp
-  (defun my-findbook-counsel-fzf ()
-      (interactive)
-    (let ((counsel-fzf-cmd "find ~/dropbox/calibre | grep -e \"(*.pdf)\" | fzf -f \"%s\" "))
-    (counsel-fzf)))
-#+end_src
 ** copy-line
 #+begin_src emacs-lisp
     (defun copy-line (arg)
@@ -557,7 +585,7 @@ tangle
   (use-package key-chord :config (key-chord-mode t))
   (general-define-key
    :keymap org-mode-map
-   "H-i" 'org-pomodoro)
+   "H-c" 'org-pomodoro)
   (defun def-rep-command (alist)
     "Return a lambda that calls the first function of ALIST. It sets the transient map to all functions of ALIST, allowing you to repeat those functions as needed."
     (lexical-let ((keymap (make-sparse-keymap))
@@ -593,6 +621,9 @@ tangle
    :prefix "C-c"
    "c" 'avy-goto-char-timer
    "w" 'avy-goto-word-0
+   "o" 'elfeed-visit-or-play-with-mpv
+   "e" 'elfeed
+   "u" 'elfeed-update
    )
 
 

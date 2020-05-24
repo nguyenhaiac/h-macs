@@ -1,20 +1,72 @@
-* Blogs                                                              :elfeed:
-** Python                                                            :python:
-*** https://realpython.com/atom.xml                                  
-*** https://planetpython.org/rss20.xml
-*** https://blog.pythonanywhere.com/feed/
-*** https://lucumr.pocoo.org/feed.atom
-*** https://pbpython.com/feeds/all.atom.xml
-** Emacs                                                             :emacs:
-*** https://planet.emacslife.com/atom.xml
-*** https://sachachua.com/blog/feed/
-*** https://karl-voit.at/feeds/lazyblorg-all.atom_1.0.links-only.xml
-*** http://pragmaticemacs.com/feed/
-*** https://irreal.org/blog/?feed=rss2
-*** http://emacsblog.org/feed/
-*** https://cpbotha.net/posts/index.xml
-*** https://emacsredux.com/feed.xml
-** Linux
-*** https://itsfoss.com/feed/
-*** https://www.tecmint.com/feed/
-*** https://linoxide.com/feed/
+* Youtube                                                                                           :elfeed:
+** Entertainment                                                                                    :entertainment:youtube:
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UChBEbMKI1eCcejTtmI32UEw][Joshua Weissman]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UCWFKCr40YwOZQx8FHU_ZqqQ][JerryRigEverything]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UCJ0-OtVpF0wOKEqT2Z1HEtA][ElectroBOOM]]   
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UC0sj9Ykf4skAGwgVC75zorQ][Treesicle]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UC1QdcIOh4l6l3a4udgU9bvw][Browntable]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UC2eEGT06FrWFU6VBnPOR9lg][Girlfriend Reviews]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UC127Qy2ulgASLYvW4AuHJZQ][CGPGrey2]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UCx0L2ZdYfiq-tsAXb8IXpQg][Just Write]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UCAL3JXZSzSm8AlZyD3nQdBA][Primitive Technology]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UCGwu0nbY2wSkW8N-cghnLpA][Jaiden Animations]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UCHL9bfHTxCMi-7vfxQ-AYtg][Abroad in Japan]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UCn1XB-jvmd9fXMzhiA6IR0w][Domics]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UCcAd5Np7fO8SeejB1FVKcYw][Best Ever Food Review Show]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UCekQr9znsk2vWxBo3YiLq2w][You Suck At Cooking]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UCimiUgDLbi6P17BdaCZpVbg][exurb1a]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UCr3cBLTYmIK9kY0F_OdFWFQ][Casually Explained]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UCr613nJgA50o8DUUT00qHvw][WULFF DEN]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UCo8bcnLyZH8tBIH9V1mLgqQ][TheOdd1sOut]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UCf29Sq6-XxLQG_XuJwMHaFg][Nando v Movies]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UC2_KC8lshtCyiLApy27raYw][KnowledgeHub]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UCMb0O2CdPBNi-QqPk5T3gsQ][James Hoffmann]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UCu6DDGoV21YhwSb5iWbriAw][Alien's Guide]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UCPzFLpOblZEaIx2lpym1l1A][Alex]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UCD0y51PJfvkZNe3y3FR5riw][Chyrosran22]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UCy_QZ1EEY4S5YT6cmBTwMwg][Name Explain]]
+
+** Education                                                                                        :education:youtube:
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UC2C_jShtL725hvbm1arSV9w][CGP Grey]]   
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UC2LZO6swZ9SLUEOks3WnsfA][2veritasium]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UC2_KC8lshtCyiLApy27raYw][KnowledgeHub]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UC6-ymYjG0SU0jUWnWh9ZzEQ][Wisecrack]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UC6107grRI4m0o2-emgoDnAA][SmarterEveryDay]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UC6mIxFTvXkWQVEHPsEdflzQ][GreatScott!]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UC6nSFpj9HTCZ5t-N3Rm3-HA][Vsauce]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UC726J5A0LLFRxQ0SZqr2mYQ][Curious Droid]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UC9-y-6csu5WGm29I7JiwpnA][Computerphile]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UC9RM-iSvTu1uPJb8X5yp3EQ][Wendover Productions]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UCBa659QWEk1AI4Tg--mrJ2A][Tom Scott]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UCG-KntY7aVnIGXYEBQvmBAQ][Thomas Frank]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UCH4BNI0-FOK2dMXoFtViWHw][It's Okay To Be Smart]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UCKOvOaJv4GK-oDqx-sj7VVg][Chubbyemu]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UCMOqf8ab-42UUQIdVoKwjlQ][Practical Engineering]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UCMk_WSPy3EE16aK5HLzCJzw][NativLang]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UCNIuvl7V8zACPpTmmNIqP2A][OverSimplified]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UCR1IuLEqb6UEA_zQ81kwXfg][Real Engineering]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UCRcgy6GzDeccI7dkbbBna3Q][LEMMiNO]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UCUHW94eEFW7hkUMVaZz4eDg][minutephysics]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UCw95T_TgbGHhTml4xZ9yIqg][The Vintage Space]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UCnbvPS_rXp4PC21PG2k1UVg][Gaming Historian]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UCZFipeZtQM5CKUjx6grh54g][Isaac Arthur]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UCsXVk37bltHxD1rDPwtNM8Q][Kurzgesagt – In a Nutshell]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UCf29Sq6-XxLQG_XuJwMHaFg][Nando v Movies]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UC2_KC8lshtCyiLApy27raYw][KnowledgeHub]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UCMb0O2CdPBNi-QqPk5T3gsQ][James Hoffmann]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UCu6DDGoV21YhwSb5iWbriAw][Alien's Guide]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UCPzFLpOblZEaIx2lpym1l1A][Alex]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UCD0y51PJfvkZNe3y3FR5riw][Chyrosran22]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UCy_QZ1EEY4S5YT6cmBTwMwg][Name Explain]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UClfEht64_NrzHf8Y0slKEjw][AlternateHistoryHub]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UCoOae5nYA7VqaXzerajD0lg][Ali Abdaal]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UC9_p50tH3WmMslWRWKnM7dQ][Adam Ragusea]]
+** Tech                                                                                             :youtube:tech:
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UC4QZ_LsYcvcq7qOsOhpAX4A][ColdFusion]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UC4xKdmAXFh4ACyhpiQ_3qBw][TechLead]]    
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UClb90NQQcskPUGDIXsQEz5Q][Dev Ed]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UC-91UA-Xy2Cvb98deRXuggA][Joshual Fluke]]
+
+** Linux                                                                                            :youtube:linux:
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UC2eYFnH61tmytImy1mTYvhA][Luke Smith]]
+*** [[https://www.youtube.com/feeds/videos.xml?channel_id=UCld68syR8Wi-GY_n4CaoJGA][Brodie Robertson]]
