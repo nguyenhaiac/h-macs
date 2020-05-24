@@ -166,8 +166,11 @@ tangle
 * utilities setup
 ** elfeed
    #+begin_src emacs-lisp
-     (use-package elfeed)
+     (use-package elfeed
+       :config
+       (setq elfeed-db-directory "~/Dropbox/.elfeed"))
      (use-package elfeed-org)
+
      (defun elfeed-play-with-mpv ()
        "Play entry link with mpv."
        (interactive)
@@ -209,7 +212,34 @@ tangle
    #+begin_src emacs-lisp
      (use-package org-noter
        :config
-       (setq org-noter-notes-search-path "~/Dropbox/brain/notes"))
+       (setq org-noter-notes-search-path '("~/Dropbox/brain/notes")))
+     (defun org-noter--insert-heading (level title &optional newlines-number location)
+       "Insert a new heading at LEVEL with TITLE.
+     The point will be at the start of the contents, after any
+     properties, by a margin of NEWLINES-NUMBER."
+       (setq newlines-number (or newlines-number 1))
+       (org-insert-heading nil t)
+       (let* ((initial-level (org-element-property :level (org-element-at-point)))
+              (changer (if (> level initial-level) 'org-do-demote 'org-do-promote))
+              (number-of-times (abs (- level initial-level))))
+         (dotimes (_ number-of-times) (funcall changer))
+         (insert (org-trim (replace-regexp-in-string "\n" " " title)))
+
+         (org-end-of-subtree)
+         (unless (bolp) (insert "\n"))
+         (org-N-empty-lines-before-current (1- newlines-number))
+         (org-entry-put nil "ANKI_DESK" "Default")
+         (org-entry-put nil "ANKI_NOTE_TYPE" "Basic")
+         (org-entry-put nil "ANKI_TAGS" "")
+         (when location
+           (org-entry-put nil org-noter-property-note-location (org-noter--pretty-print-location location))
+
+           (when org-noter-doc-property-in-notes
+             (org-noter--with-valid-session
+              (org-entry-put nil org-noter-property-doc-file (org-noter--session-property-text session))
+              (org-entry-put nil org-noter--property-auto-save-last-location "nil"))))
+
+         (run-hooks 'org-noter-insert-heading-hook)))
    #+end_src
 ** anki-editor
    #+begin_src emacs-lisp
@@ -247,6 +277,18 @@ tangle
     (setq org-roam-graph-executable "/usr/bin/dot"))
   (when (my-system-type-is-windows)
     (setq org-roam-graph-executable "c:/Program Files (x86)/Graphviz2.38/bin/dot"))
+  (setq org-roam-capture-templates
+        '(("d" "default" plain (function org-roam--capture-get-point)
+          "%?"
+          :file-name "%<%Y%m%d%H%M%S>-${slug}"
+          :head "#+TITLE: ${title}\n"
+          :unnarrowed t)
+         ("c" "from notes" plain (function org-roam--capture-get-point)
+          "%i"
+          :file-name "%<%Y%m%d%H%M%S>-${slug}"
+          :head "#+TITLE: ${title}\n"
+          :unnarrowed t))
+        )
 #+end_src
 ** evil
 #+begin_src emacs-lisp :tangle no
@@ -630,6 +672,7 @@ tangle
    "o" 'elfeed-visit-or-play-with-mpv
    "e" 'elfeed
    "u" 'elfeed-update
+   "f" 'my-counsel-p4
    )
 
 
