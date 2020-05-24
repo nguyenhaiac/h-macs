@@ -207,7 +207,9 @@ tangle
    #+end_src
 ** Org-noter
    #+begin_src emacs-lisp
-     (use-package org-noter)
+     (use-package org-noter
+       :config
+       (setq org-noter-notes-search-path "~/Dropbox/brain/notes"))
    #+end_src
 ** anki-editor
    #+begin_src emacs-lisp
@@ -574,6 +576,10 @@ tangle
 #+end_src
 * Keybindings
 #+begin_src emacs-lisp
+  (defun my-counsel-p4 ()
+    (interactive)
+    (let ((counsel-fzf-cmd "find ~/Dropbox/Calibre | grep -e pdf | fzf -f \"%s\""))
+      (counsel-fzf)))
   (use-package general)
   ;  (general-evil-setup)
   (general-define-key "<menu>" (general-simulate-key "C-c"))
