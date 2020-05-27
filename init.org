@@ -334,6 +334,24 @@ tangle
        "Advise capture-finalize to close the frame"
        (if (equal "emacs-capture" (frame-parameter nil 'name))
            (delete-frame)))
+     (defun org-journal-find-location ()
+       ;; Open today's journal, but specify a non-nil prefix argument in order to
+       ;; inhibit inserting the heading; org-capture will insert the heading.
+       (org-journal-new-entry t)
+       ;; Position point on the journal's top-level heading so that org-capture
+       ;; will add the new entry as a child entry.
+       (goto-char (point-min)))
+
+     (setq org-capture-templates '(("j" "Journal entry" entry (function org-journal-find-location)
+                                    "* %(format-time-string org-journal-time-format)%^{Title}\n%i%?")))
+   #+end_src
+** Org-journal
+   #+begin_src emacs-lisp
+     (use-package org-journal)
+     (setq org-journal-dir "~/Dropbox/brain/journals")
+     (setq org-journal-date-format "%A, %d %B %Y")
+     (setq org-journal-file-type 'weekly)
+     (setq org-journal-file-format "%Y%m%d.org")
    #+end_src
 ** evil
 #+begin_src emacs-lisp :tangle yes
@@ -478,15 +496,6 @@ tangle
 *** settings
 #+begin_src emacs-lisp
   (require 'org-habit)
-  (setq org-agenda-files (list "~/dropbox/orggtd/todo.org"
-                               "~/dropbox/orggtd/mobile.org"
-                               "~/onedrive - abb/tender.org"
-                               "~/dropbox/orggtd/emacs-bindings.org"))
-  (setq org-refile-files (list "~/dropbox/orggtd/todo.org"
-                               "~/dropbox/orggtd/mobile.org"
-                               "~/onedrive - abb/tender.org"
-                               "~/dropbox/orggtd/someday.org"
-                               "~/dropbox/orggtd/references.org"))
   (setq spacemacs-theme-org-agenda-height nil
         org-agenda-start-day "-1d"
         org-agenda-skip-scheduled-if-done t
@@ -504,29 +513,13 @@ tangle
         org-clock-out-remove-zero-time-clocks t
         org-clock-out-when-done t
         org-clock-persist t)
-#+end_src
-*** org-todo keywords
-#+begin_src emacs-lisp
-  (setq org-todo-keyword-faces
-        '(("todo" . org-warning)
-          ("strt" . "yellow")
-          ("next" . "orange")
-          ("wait" . "gray")
-          ("toread" . "green")
-          ("canceled" . (:foreground "blue" :weight bold))))
-  (setq org-todo-keywords
-        '((sequence
-           "todo(t)"  ; a task that needs doing & is ready to do
-           "next(n)"
-           "strt(s)"  ; a task that is in progress
-           "wait(w)"  ; something is holding up this task; or it is paused
-           "toread(r)"
-           "|"
-           "done(d)"  ; task successfully completed
-           "phone(p)"
-           "read(r)"
-           "meeting(m)"
-           "kill(k)")))
+  (defun org-journal-find-location ()
+    ;; Open today's journal, but specify a non-nil prefix argument in order to
+    ;; inhibit inserting the heading; org-capture will insert the heading.
+    (org-journal-new-entry t)
+    ;; Position point on the journal's top-level heading so that org-capture
+    ;; will add the new entry as a child entry.
+    (goto-char (point-min)))
 #+end_src
 ** deft and zetteldeft
 #+begin_src emacs-lisp
@@ -706,20 +699,25 @@ tangle
    :prefix "C-c"
    "c" 'avy-goto-char-timer
    "w" 'avy-goto-word-0
-   "o" 'elfeed-visit-or-play-with-mpv
-   "e" 'elfeed
-   "u" 'elfeed-update
+   "e" '(:ignore t :wk "elfeed")
+   "eo" 'elfeed-visit-or-play-with-mpv
+   "ee" 'elfeed
+   "eu" 'elfeed-update
    "f" 'my-counsel-p4
+   "a" '(:ignore t :wk "Org")
+   "ac" 'org-capture 
    )
 
 
   (general-define-key
    :keymaps 'lispy-mode-map
-   "j" 'special-lispy-up
-   "k" 'special-lispy-down)
+   "h" 'special-lispy-up
+   "k" 'special-lispy-down
+   "j" 'special-lispy-left)
 
   (general-nmap "k" 'evil-next-line)
-  (general-nmap "j" 'evil-previous-line)
+  (general-nmap "h" 'evil-previous-line)
+  (general-nmap "j" 'evil-backward-char)
 #+end_src
 
 #+RESULTS:
