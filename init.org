@@ -318,7 +318,6 @@ tangle
           (goto-char (point-max))
           (insert (concat "\n* Backlinks\n") links)))))
 
-
   (add-hook 'org-export-before-processing-hook 'my/org-export-preprocessor)
 
 #+end_src
@@ -337,7 +336,7 @@ tangle
            (delete-frame)))
    #+end_src
 ** evil
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle yes
   (use-package evil
     :init
     (setq evil-disable-insert-state-bindings t
@@ -348,10 +347,6 @@ tangle
     :config
     (evil-mode t))
 #+end_src
-
-#+RESULTS:
-: t
-
 ** Corral
 #+begin_src emacs-lisp
   (use-package corral
@@ -436,7 +431,7 @@ tangle
     (setq ivy-use-virtual-buffers t)
     (setq ivy-count-format "(%d/%d) ")
     (setq enable-recursive-minibuffers t)
-    (setq ivy-initial-inputs-alist nil) )
+    (setq ivy-initial-inputs-alist nil))
   (use-package counsel
     :diminish counsel-mode
     :config
@@ -669,7 +664,7 @@ tangle
     (let ((counsel-fzf-cmd "find ~/Dropbox/Calibre | grep -e pdf | fzf -f \"%s\""))
       (counsel-fzf)))
   (use-package general)
-  ;  (general-evil-setup)
+  (general-evil-setup)
   (general-define-key "<menu>" (general-simulate-key "C-c"))
   (general-define-key
    "C-z" 'undo-fu-only-undo
@@ -704,12 +699,8 @@ tangle
            ("h" . ace-window)
            ("s" . (lambda () (interactive) (ace-window 4)))
            ("d" . (lambda () (interactive) (ace-window 16)))
-           )))
-  (key-chord-define-global "hh"   
-        (def-rep-command
-         '(nil
            ("-" . text-scale-decrease)
-           ("=" . text-scale-increase)
+           ("=" . text-scale-decrease)
            )))
   (general-define-key
    :prefix "C-c"
@@ -724,14 +715,11 @@ tangle
 
   (general-define-key
    :keymaps 'lispy-mode-map
-   "u" 'special-lispy-up
-   "e" 'special-lispy-down
-   "n" 'special-lispy-left
-   "i" 'special-lispy-right
-   "k" 'special-lispy-undo
-   "j" 'special-lispy-eval
-   "l" 'special-lispy-tab
-   "h" 'special-lispy-new-copy)
+   "j" 'special-lispy-up
+   "k" 'special-lispy-down)
+
+  (general-nmap "k" 'evil-next-line)
+  (general-nmap "j" 'evil-previous-line)
 #+end_src
 
 #+RESULTS:
