@@ -369,17 +369,36 @@ tangle
     (evil-set-initial-state 'info-mode-map 'emacs)
     (evil-mode t))
 #+end_src
+** Evil-commentary
+   #+begin_src emacs-lisp
+     (use-package evil-commentary)
+     (evil-commentary-mode 1)
+   #+end_src
+** evil-snipe
+   #+begin_src emacs-lisp
+     (use-package evil-snipe)
+     (evil-snipe-mode +1)
+     (evil-snipe-override-mode +1)
+     (setq evil-snipe-scope 'visible)
+   #+end_src
+** Evil-easymotion
+   #+begin_src emacs-lisp
+     (use-package evil-easymotion)
+     (evilem-default-keybindings "SPC")
+
+   #+end_src
 ** Corral
 #+begin_src emacs-lisp
-  (use-package corral
-    :config
-    (global-set-key (kbd "M-9") 'corral-parentheses-backward)
-    (global-set-key (kbd "M-0") 'corral-parentheses-forward)
-    (global-set-key (kbd "M-[") 'corral-brackets-backward)
-    (global-set-key (kbd "M-]") 'corral-brackets-forward)
-    (global-set-key (kbd "M-{") 'corral-braces-backward)
-    (global-set-key (kbd "M-}") 'corral-braces-forward)
-    (global-set-key (kbd "M-\"") 'corral-double-quotes-backward))
+    (use-package corral
+      :config
+      (global-set-key (kbd "M-9") 'corral-parentheses-backward)
+  (setq evil-snipe-scope 'visible')
+      (global-set-key (kbd "M-0") 'corral-parentheses-forward)
+      (global-set-key (kbd "M-[") 'corral-brackets-backward)
+      (global-set-key (kbd "M-]") 'corral-brackets-forward)
+      (global-set-key (kbd "M-{") 'corral-braces-backward)
+      (global-set-key (kbd "M-}") 'corral-braces-forward)
+      (global-set-key (kbd "M-\"") 'corral-double-quotes-backward))
 #+end_src
 ** lispy
 #+begin_src emacs-lisp :tangle yes
