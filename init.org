@@ -547,6 +547,12 @@ tangle
   (use-package zetteldeft
     :after deft)
 #+end_src
+** MPdel
+#+begin_src emacs-lisp
+  (use-package mpdel
+    :config
+    (mpdel-mode))
+#+end_src
 * programming setup
 ** projectile
 #+begin_src emacs-lisp
@@ -707,6 +713,7 @@ tangle
            ("-" . text-scale-decrease)
            ("=" . text-scale-decrease)
            )))
+
   (general-define-key
    :prefix "C-c"
    "c" 'avy-goto-char-timer
@@ -731,6 +738,33 @@ tangle
   (general-nmap "h" 'evil-previous-line)
   (general-nmap "j" 'evil-backward-char)
 #+end_src
+** SPC leader keys
+#+begin_src emacs-lisp
+  (general-create-definer my-leader-def
+    :prefix "SPC")
+  (general-create-definer my-local-leader-def
+    :prefix ",")
 
-#+RESULTS:
+  (my-leader-def
+    :keymaps 'normal
+    "j" 'avy-goto-char-timer
+    "e" '(:ignore t :wk "elfeed")
+    "eo" 'elfeed-visit-or-play-with-mpv
+    "ee" 'elfeed
+    "eu" 'elfeed-update
+    "f" 'my-counsel-p4
+    "c" 'org-capture 
+    "b" '(:ignore t :wk "Buffer")
+    "bb" 'switch-to-buffer
+    "bk" 'kill-buffer
+    "bi" 'ibuffer
+    "bw" '(switch-to-buffer-other-window :wk "Other windows")
+    "b." 'next-buffer
+    "b," 'previous-buffer
+    "m" '(:ignore t :wk "MPdel")
+    "mp" 'libmpdel-playback-play-pause
+    "mn" 'libmpdel-playback-next
+    "mp" 'libmpdel-playback-previous
+    )
 
+#+end_src
