@@ -292,12 +292,19 @@ properties, by a margin of NEWLINES-NUMBER."
         evil-want-integration t
         evil-want-keybinding nil)
   :config
-  (evil-set-initial-state 'elfeed-show-mode-map 'emacs)
-  (evil-set-initial-state 'elfeed-search-mode-map 'emacs)
-  (evil-set-initial-state 'magit-mode-map 'emacs)
-  (evil-set-initial-state 'dired-mode-map 'emacs)
-  (evil-set-initial-state 'info-mode-map 'emacs)
+  (evil-set-initial-state 'elfeed-show-mode 'emacs)
+  (evil-set-initial-state 'elfeed-search-mode 'emacs)
+  (evil-set-initial-state 'magit-mode 'emacs)
+  (evil-set-initial-state 'dired-mode 'emacs)
+  (evil-set-initial-state 'info-mode 'emacs)
   (evil-mode t))
+
+(use-package evil-commentary)
+(evil-commentary-mode)
+
+(use-package evil-snipe)
+(evil-snipe-mode +1)
+(evil-snipe-override-mode +1)
 
 (use-package corral
   :config
