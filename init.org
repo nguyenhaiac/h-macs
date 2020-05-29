@@ -371,11 +371,6 @@ tangle
 
   (use-package evil-commentary)
   (evil-commentary-mode)
-
-  (use-package evil-snipe)
-  (evil-snipe-mode +1)
-  (evil-snipe-override-mode +1)
-
 #+end_src
 ** Evil-commentary
    #+begin_src emacs-lisp
@@ -400,7 +395,6 @@ tangle
     (use-package corral
       :config
       (global-set-key (kbd "M-9") 'corral-parentheses-backward)
-  (setq evil-snipe-scope 'visible')
       (global-set-key (kbd "M-0") 'corral-parentheses-forward)
       (global-set-key (kbd "M-[") 'corral-brackets-backward)
       (global-set-key (kbd "M-]") 'corral-brackets-forward)
@@ -572,6 +566,19 @@ tangle
     :config
     (mpdel-mode))
 #+end_src
+** Lispyville
+#+begin_src emacs-lisp
+  (use-package lispyville
+    :init
+    (general-add-hook '(emacs-lisp-mode-hook lisp-mode-hook) #'lispyville-mode))
+  (with-eval-after-load 'lispyville
+    (lispyville-set-key-theme
+     '(operators
+       c-w
+       commentary
+       (escape insert)
+       (additional-movement normal visual motion))))
+#+end_src
 * programming setup
 ** projectile
 #+begin_src emacs-lisp
@@ -734,20 +741,6 @@ tangle
            )))
 
   (general-define-key
-   :prefix "C-c"
-   "c" 'avy-goto-char-timer
-   "w" 'avy-goto-word-0
-   "e" '(:ignore t :wk "elfeed")
-   "eo" 'elfeed-visit-or-play-with-mpv
-   "ee" 'elfeed
-   "eu" 'elfeed-update
-   "f" 'my-counsel-p4
-   "a" '(:ignore t :wk "Org")
-   "ac" 'org-capture 
-   )
-
-
-  (general-define-key
    :keymaps 'lispy-mode-map
    "h" 'special-lispy-up
    "k" 'special-lispy-down
@@ -756,16 +749,20 @@ tangle
   (general-nmap "k" 'evil-next-line)
   (general-nmap "h" 'evil-previous-line)
   (general-nmap "j" 'evil-backward-char)
+  (general-vmap "k" 'evil-next-line)
+  (general-vmap "h" 'evil-previous-line)
+  (general-vmap "j" 'evil-backward-char)
 #+end_src
 ** SPC leader keys
 #+begin_src emacs-lisp
   (general-create-definer my-leader-def
-    :prefix "SPC")
+    :prefix "C-c")
   (general-create-definer my-local-leader-def
     :prefix ",")
-
+  (general-nmap "SPC" (general-simulate-key "C-c"))
   (my-leader-def
-    :keymaps 'normal
+    "SPC" 'counsel-M-x
+    "." 'counsel-find-file
     "j" 'avy-goto-char-timer
     "e" '(:ignore t :wk "elfeed")
     "eo" 'elfeed-visit-or-play-with-mpv
@@ -786,4 +783,24 @@ tangle
     "mp" 'libmpdel-playback-previous
     )
 
+  (my-local-leader-def
+    :states 'normal
+    :keymaps 'org-mode-map
+    "y" 'org-store-link
+    "l" 'org-insert-link
+    "i" 'org-download-screenshot
+    )
+  (general-define-key
+   :keymaps 'org-capture-mode-map
+   [remap evil-save-and-close]          'org-capture-finalize
+   [remap evil-save-modified-and-close] 'org-capture-finalize
+   [remap evil-quit]                    'org-capture-kill)
+
+  (general-define-key
+   :states 'normal
+   :keymaps 'org-capture-mode-map
+   ;; keyboard macro definition
+   "RET" "C-c C-c"
+   ;; general.el extended definition
+   "SPC k" '(org-capture-kill :which-key "abort capture"))
 #+end_src
