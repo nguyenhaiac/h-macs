@@ -6,10 +6,9 @@
 ;;; -*- lexical-binding: t -*-
 #+end_src
 
-* initialize the configuration
-** tangle & byte compile
-
-tangle and byte compile
+* Initialize the configuration
+** Tangle & byte compile
+*** Tangle and byte compile
 
 #+begin_src emacs-lisp :tangle yes
   (defun my--tangle-byte-compile-org ()
@@ -21,7 +20,7 @@ tangle and byte compile
        (byte-recompile-directory (expand-file-name user-emacs-directory) 0)))
 #+end_src
 
-tangle
+*** Tangle
 
 #+begin_src emacs-lisp :tangle yes
 (defun my--tangle-org ()
@@ -33,7 +32,7 @@ tangle
 (add-hook 'after-save-hook #'my--tangle-org)
 
 #+end_src
-** bootstrap straight.el
+** Bootstrap straight.el
 *** install straight.el if not yet
 #+begin_src emacs-lisp :tangle yes
 (defvar bootstrap-version)
@@ -55,8 +54,7 @@ tangle
 (setq straight-use-package-by-default t)
 (straight-use-package 'org-plus-contrib)
 #+end_src
-
-** better-default 
+** Better-default 
 #+begin_src emacs-lisp
   (setq
    default-frame-alist '((font . "CaskaydiaCove NF-10"))
@@ -108,7 +106,7 @@ tangle
                                (horizontal-scroll-bars . nil))))
   (add-hook 'after-make-frame-functions 'my/disable-scroll-bars)
 #+end_src
-** detect system
+** Detect system
 #+begin_src emacs-lisp
   ;; check if system is microsoft windows
   (defun my-system-type-is-windows ()
@@ -122,14 +120,7 @@ tangle
     (string-equal system-type "gnu/linux")
     )
 #+end_src
-* aesthetic improvement
-** doom themes
-#+begin_src emacs-lisp :tangle yes
-  (use-package doom-themes
-    :config
-    (setq doom-themes-enable-bold t
-          doom-themes-enable-italic t))
-#+end_src
+* Aesthetic improvement
 ** kaolin themes
 #+begin_src emacs-lisp :tangle yes
   (use-package kaolin-themes
@@ -143,11 +134,7 @@ tangle
     :config
     (setq sml/theme 'respectful)
     (sml/setup)
-    (add-to-list 'sml/replacer-regexp-list '("^~/dropbox/" ":dbox:")))
-#+end_src
-** material theme
-#+begin_src emacs-lisp
-  (use-package flatland-theme)
+    (add-to-list 'sml/replacer-regexp-list '("^~/Dropbox/" ":dbox:")))
 #+end_src
 ** doom-modeline
 #+begin_src emacs-lisp
@@ -163,13 +150,18 @@ tangle
 #+begin_src emacs-lisp
   (use-package rainbow-mode)
 #+end_src
-* utilities setup
+* Utilities setup
+#+begin_src emacs-lisp
+  (use-package general)
+#+end_src
 ** elfeed
    #+begin_src emacs-lisp
      (use-package elfeed
        :config
        (setq elfeed-db-directory "~/Dropbox/.elfeed"))
-     (use-package elfeed-org)
+     (use-package elfeed-org
+       :config
+       (elfeed-org))
 
      (defun elfeed-play-with-mpv ()
        "Play entry link with mpv."
@@ -213,6 +205,7 @@ tangle
      (use-package org-noter
        :config
        (setq org-noter-notes-search-path '("~/Dropbox/brain/notes")))
+
      (defun org-noter--insert-heading (level title &optional newlines-number location)
        "Insert a new heading at LEVEL with TITLE.
      The point will be at the start of the contents, after any
@@ -228,7 +221,7 @@ tangle
          (org-end-of-subtree)
          (unless (bolp) (insert "\n"))
          (org-N-empty-lines-before-current (1- newlines-number))
-         (org-entry-put nil "ANKI_DESK" "Default")
+         (org-entry-put nil "ANKI_DECK" "Default")
          (org-entry-put nil "ANKI_NOTE_TYPE" "Basic")
          (org-entry-put nil "ANKI_TAGS" "")
          (when location
@@ -262,12 +255,12 @@ tangle
     :custom
     (org-roam-directory "~/Dropbox/brain")
     :bind (:map org-roam-mode-map
-                (("C-c n l" . org-roam)
-                 ("C-c n f" . org-roam-find-file)
-                 ("C-c n g" . org-roam-show-graph))
+                (("C-c r l" . org-roam)
+                 ("C-c r f" . org-roam-find-file)
+                 ("C-c r g" . org-roam-show-graph))
                 :map org-mode-map
-                (("C-c n i" . org-roam-insert)
-                 ("C-c n c" . org-roam-capture))))
+                (("C-c r i" . org-roam-insert)
+                 ("C-c r c" . org-roam-capture))))
   (use-package company-org-roam
     :straight (:host github :repo "jethrokuan/company-org-roam")
     :config
@@ -353,7 +346,7 @@ tangle
      (setq org-journal-file-format "%Y%m%d.org")
    #+end_src
 ** evil
-#+begin_src emacs-lisp :tangle yes
+ #+begin_src emacs-lisp :tangle no
   (use-package evil
     :init
     (setq evil-disable-insert-state-bindings t
@@ -362,8 +355,6 @@ tangle
           evil-want-integration t
           evil-want-keybinding nil)
     :config
-    (evil-set-initial-state 'elfeed-show-mode 'emacs)
-    (evil-set-initial-state 'elfeed-search-mode 'emacs)
     (evil-set-initial-state 'magit-mode 'emacs)
     (evil-set-initial-state 'dired-mode 'emacs)
     (evil-set-initial-state 'info-mode 'emacs)
@@ -372,23 +363,13 @@ tangle
   (use-package evil-commentary)
   (evil-commentary-mode)
 #+end_src
-** Evil-commentary
-   #+begin_src emacs-lisp
-     (use-package evil-commentary)
-     (evil-commentary-mode 1)
-   #+end_src
-** evil-snipe
-   #+begin_src emacs-lisp
-     (use-package evil-snipe)
-     (evil-snipe-mode +1)
-     (evil-snipe-override-mode +1)
-     (setq evil-snipe-scope 'visible)
-   #+end_src
-** Evil-easymotion
-   #+begin_src emacs-lisp
-     (use-package evil-easymotion)
-     (evilem-default-keybindings "SPC")
-
+** Evil-collection
+   #+begin_src emacs-lisp :tangle no
+     (use-package evil-collection
+       :after evil
+       :ensure t
+       :config
+       (evil-collection-init))
    #+end_src
 ** Corral
 #+begin_src emacs-lisp
@@ -504,9 +485,11 @@ tangle
 #+end_src
 ** org-bullets
 #+begin_src emacs-lisp
-  (use-package org-bullets
-    :config
-    (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+  (use-package org-superstar
+    :config (add-hook 'org-mode-hook (lambda () (org-superstar-mode 1))))
+  (setq inhibit-compacting-font-caches t)
+  (setq org-hide-emphasis-markers t)
+  (setq org-superstar-headline-bullets-list (quote ("◉" "◆" "✚" "☀" "○")))
 #+end_src
 ** undo-fu
 #+begin_src emacs-lisp
@@ -579,43 +562,10 @@ tangle
        (escape insert)
        (additional-movement normal visual motion))))
 #+end_src
-* programming setup
-** projectile
-#+begin_src emacs-lisp
-  (use-package projectile
-    :config
-    (projectile-mode 1))
-#+end_src
-** emmet-mode
-#+begin_src emacs-lisp
-  (use-package emmet-mode
-    :config
-    (add-hook 'sgml-mode-hook 'emmet-mode)
-    (add-hook 'css-mode-hook 'emmet-mode)
-    (setq emmet-self-closing-tag-style " /"))
-#+end_src
-** webmode
-#+begin_src emacs-lisp
-  (use-package web-mode
-    :config
-    (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
-    (setq web-mode-engines-alist '(("django" . "\\.html\\'")))
-    (setq web-mode-enable-auto-pairing nil))
-#+end_src
+* Programming setup
 ** magit - the king of git
 #+begin_src emacs-lisp :tangle yes
  (use-package magit)
-#+end_src
-** python with elpy
-#+begin_src emacs-lisp :tangle yes
-  (use-package elpy
-    :if (my-system-type-is-windows)
-    :config
-    (elpy-enable))
-#+end_src
-** blacken
-#+begin_src emacs-lisp
-  (use-package blacken)
 #+end_src
 ** python debugging with realgud
 #+begin_src emacs-lisp :tangle yes
@@ -662,15 +612,11 @@ tangle
                    (reusable-frames . visible)
                    (window-height . 0.3))))
 #+end_src
-** rustic - rust mode for emacs
-#+begin_src emacs-lisp :tangle yes
-  (use-package rustic)
-#+end_src
 ** yaml-mode
 #+begin_src emacs-lisp :tangle yes
   (use-package yaml-mode)
 #+end_src
-* helper functions
+* Helper functions
 ** copy-line
 #+begin_src emacs-lisp
     (defun copy-line (arg)
@@ -696,35 +642,33 @@ tangle
 #+end_src
 * Keybindings
 #+begin_src emacs-lisp
-  (defun my-counsel-p4 ()
-    (interactive)
-    (let ((counsel-fzf-cmd "find ~/Dropbox/Calibre | grep -e pdf | fzf -f \"%s\""))
-      (counsel-fzf)))
-  (use-package general)
-  (general-evil-setup)
-  (general-define-key "<menu>" (general-simulate-key "C-c"))
-  (general-define-key
-   "C-z" 'undo-fu-only-undo
-   "C-s-z" 'undo-fu-only-redo)
-  (general-define-key
-   "H-t" 'vterm-toggle)
-  (use-package key-chord :config (key-chord-mode t))
-  (general-define-key
-   :keymap org-mode-map
-   "H-c" 'org-pomodoro)
+    (defun my-counsel-p4 ()
+      (interactive)
+      (let ((counsel-fzf-cmd "find ~/Dropbox/Calibre | grep -e pdf | fzf -f \"%s\""))
+        (counsel-fzf)))
+
+    (general-define-key "<menu>" (general-simulate-key "C-c"))
+    (general-define-key
+     "C-z" 'undo-fu-only-undo
+     "C-s-z" 'undo-fu-only-redo
+     "H-t" 'vterm-toggle)
+
+    (use-package key-chord :config (key-chord-mode t))
+
   (defun def-rep-command (alist)
-    "Return a lambda that calls the first function of ALIST. It sets the transient map to all functions of ALIST, allowing you to repeat those functions as needed."
-    (lexical-let ((keymap (make-sparse-keymap))
-                  (func (cdar alist)))
-      (mapc (lambda (x)
-              (when x
-                (define-key keymap (kbd (car x)) (cdr x))))
-            alist)
-      (lambda (arg)
-        (interactive "p")
-        (when func
-          (funcall func arg))
-        (set-transient-map keymap t))))
+      "Return a lambda that calls the first function of ALIST. It sets the transient map to all functions of ALIST, allowing you to repeat those functions as needed."
+      (lexical-let ((keymap (make-sparse-keymap))
+                    (func (cdar alist)))
+        (mapc (lambda (x)
+                (when x
+                  (define-key keymap (kbd (car x)) (cdr x))))
+              alist)
+        (lambda (arg)
+          (interactive "p")
+          (when func
+            (funcall func arg))
+          (set-transient-map keymap t))))
+
   (key-chord-define-global "yy"   
         (def-rep-command
          '(nil
@@ -740,34 +684,17 @@ tangle
            ("=" . text-scale-decrease)
            )))
 
-  (general-define-key
-   :keymaps 'lispy-mode-map
-   "h" 'special-lispy-up
-   "k" 'special-lispy-down
-   "j" 'special-lispy-left)
-
-  (general-nmap "k" 'evil-next-line)
-  (general-nmap "h" 'evil-previous-line)
-  (general-nmap "j" 'evil-backward-char)
-  (general-vmap "k" 'evil-next-line)
-  (general-vmap "h" 'evil-previous-line)
-  (general-vmap "j" 'evil-backward-char)
-#+end_src
-** SPC leader keys
-#+begin_src emacs-lisp
   (general-create-definer my-leader-def
     :prefix "C-c")
-  (general-create-definer my-local-leader-def
-    :prefix ",")
-  (general-nmap "SPC" (general-simulate-key "C-c"))
   (my-leader-def
+    "" 'nil
     "SPC" 'counsel-M-x
     "." 'counsel-find-file
     "j" 'avy-goto-char-timer
-    "e" '(:ignore t :wk "elfeed")
-    "eo" 'elfeed-visit-or-play-with-mpv
-    "ee" 'elfeed
-    "eu" 'elfeed-update
+    "l" '(:ignore t :wk "elfeed")
+    "lo" 'elfeed-visit-or-play-with-mpv
+    "le" 'elfeed
+    "lu" 'elfeed-update
     "f" 'my-counsel-p4
     "c" 'org-capture 
     "b" '(:ignore t :wk "Buffer")
@@ -781,26 +708,16 @@ tangle
     "mp" 'libmpdel-playback-play-pause
     "mn" 'libmpdel-playback-next
     "mp" 'libmpdel-playback-previous
+    "e" 'windmove-down
+    "i" 'windmove-right
+    "n" 'windmove-left
+    "u" 'windmove-up
+    "y" 'other-window
+    "w" '(:ignore t :wk "windows")
+    "wD" 'delete-window
+    "wd" '(lambda () (interactive) (ace-window 16))
+    "-" 'text-scale-decrease
+    "k" 'copy-line
+    "=" 'text-scale-increase
     )
-
-  (my-local-leader-def
-    :states 'normal
-    :keymaps 'org-mode-map
-    "y" 'org-store-link
-    "l" 'org-insert-link
-    "i" 'org-download-screenshot
-    )
-  (general-define-key
-   :keymaps 'org-capture-mode-map
-   [remap evil-save-and-close]          'org-capture-finalize
-   [remap evil-save-modified-and-close] 'org-capture-finalize
-   [remap evil-quit]                    'org-capture-kill)
-
-  (general-define-key
-   :states 'normal
-   :keymaps 'org-capture-mode-map
-   ;; keyboard macro definition
-   "RET" "C-c C-c"
-   ;; general.el extended definition
-   "SPC k" '(org-capture-kill :which-key "abort capture"))
 #+end_src
