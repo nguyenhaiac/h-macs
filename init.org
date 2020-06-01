@@ -495,7 +495,6 @@
 #+begin_src emacs-lisp
   (use-package undo-fu)
 #+end_src
-
 ** deadgrep
 #+begin_src emacs-lisp
   (use-package deadgrep)
@@ -548,73 +547,6 @@
   (use-package mpdel
     :config
     (mpdel-mode))
-#+end_src
-** Lispyville
-#+begin_src emacs-lisp
-  (use-package lispyville
-    :init
-    (general-add-hook '(emacs-lisp-mode-hook lisp-mode-hook) #'lispyville-mode))
-  (with-eval-after-load 'lispyville
-    (lispyville-set-key-theme
-     '(operators
-       c-w
-       commentary
-       (escape insert)
-       (additional-movement normal visual motion))))
-#+end_src
-* Programming setup
-** magit - the king of git
-#+begin_src emacs-lisp :tangle yes
- (use-package magit)
-#+end_src
-** python debugging with realgud
-#+begin_src emacs-lisp :tangle yes
-  (use-package realgud)
-#+end_src
-** python with lsp mode
-#+begin_src emacs-lisp :tangle yes
-  (use-package lsp-mode
-    :if (my-system-type-is-gnu)
-    :commands lsp
-    :init
-    (setq lsp-keymap-prefix "C-c l")
-    :hook
-    (lsp-mode . lsp-enable-which-key-integration)
-    (python-mode . lsp))
-#+end_src
-** pyvenv
-#+begin_src emacs-lisp :tangle yes
-  (use-package pyvenv)
-#+end_src
-** c programming setup
-#+begin_src emacs-lisp :tangle yes
-  (use-package company-irony
-    :config
-    (add-to-list 'company-backends 'company-irony))
-
-  (use-package irony
-    :hook ((c++-mode-hook . irony-mode)
-           (c-mode-hook . irony-mode)
-           (irony-mode-hook . irony-cdb-autosetup-compile-options)))
-#+end_src
-** vterm
-#+begin_src emacs-lisp :tangle yes
-  (use-package vterm
-    :if (my-system-type-is-gnu))
-  (use-package vterm-toggle
-    :straight (vterm-toggle :type git :host github :repo "jixiuf/vterm-toggle")
-    :if (my-system-type-is-gnu)
-    :config
-    (setq vterm-toggle-fullscreen-p nil)
-    (add-to-list 'display-buffer-alist
-                 '("^v?term.*"
-                   (display-buffer-reuse-window display-buffer-at-bottom)
-                   (reusable-frames . visible)
-                   (window-height . 0.3))))
-#+end_src
-** yaml-mode
-#+begin_src emacs-lisp :tangle yes
-  (use-package yaml-mode)
 #+end_src
 * Helper functions
 ** copy-line
