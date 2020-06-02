@@ -585,7 +585,7 @@
   (defun create-headline (title level)
     (org-element-interpret-data `(headline (:level ,level :title ,title))))
 
-  (defun my/creat-cloze ()
+  (defun my/create-cloze ()
     (interactive)
     (save-excursion
       (let ((beg (org-element-property :contents-begin (org-element-at-point)))
@@ -625,6 +625,15 @@
         )
       )
     )
+
+;; TODO: I want to change between 2 type of card
+
+  (defun my/create-flashcard ()
+    (interactive)
+    (let ((card-type (completing-read "Choose the card type: " '("Cloze" "Basic" ) nil nil)))
+      (cond ((string= "Cloze" card-type) (my/create-cloze))
+            ((string= "Basic" card-type) (my/create-basic)))
+      ))
 #+end_src
 * Keybindings
 #+begin_src emacs-lisp
