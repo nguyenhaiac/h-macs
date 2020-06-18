@@ -11,6 +11,7 @@
 *** Tangle and byte compile
 
 #+begin_src emacs-lisp :tangle yes
+(setq gc-cons-threshold (* 50 1000 1000))
   (defun my--tangle-byte-compile-org ()
    "tangles emacs.org and byte compiles ~/.emacs.d/"
      (interactive)
@@ -50,9 +51,10 @@
 #+end_src
 *** install use-package and set it to use straight by default
 #+begin_src emacs-lisp :tangle yes
-(straight-use-package 'use-package)
-(setq straight-use-package-by-default t)
-(straight-use-package 'org-plus-contrib)
+  (straight-use-package 'use-package)
+  (setq straight-use-package-by-default t)
+  (straight-use-package 'org-plus-contrib)
+(setq org-modules nil)
 #+end_src
 ** Better-default 
 #+begin_src emacs-lisp
@@ -66,37 +68,22 @@
   (setq org-src-window-setup 'split-window-below)
   (setq w32-pass-apps-to-system nil)
   (setq w32-apps-modifier 'hyper) ; menu/app key
-  (ido-mode nil)
   (use-package gcmh
     :config
     (gcmh-mode 1))
   (setq-default fringe-indicator-alist (assq-delete-all 'truncation fringe-indicator-alist))
   (use-package better-defaults)
   (global-hl-line-mode 1)
-  (setq-default cursor-type 'bar)
-  (setq make-backup-files nil) ; stop creating backup~ files
-  (setq auto-save-default nil) ; stop creating #autosave# files
-  (setq create-lockfiles nil)  ; stop creating .# files
   (global-auto-revert-mode t)
-  (fset 'yes-or-no-p 'y-or-n-p)
   (setq
-   cursor-in-non-selected-windows t  ; hide the cursor in inactive windows
-   inhibit-splash-screen t
-   echo-keystrokes 0.1               ; show keystrokes right away, don't show the message in the scratch buffe
-   initial-scratch-message nil       ; empty scratch buffer
    initial-major-mode 'org-mode      ; org mode by default
    custom-safe-themes t
-   confirm-kill-emacs 'y-or-n-p      ; y and n instead of yes and no when quitting
    )
-  (ido-mode nil)
-  (add-hook 'org-mode-hook 'hl-line-mode)
-  (add-hook 'org-mode-hook 'visual-line-mode)
   (setq line-spacing 0.15)
   (lambda () (progn
     (setq left-margin-width 2)
     (setq right-margin-width 2)
     (set-window-buffer nil (current-buffer))))
-  (setq org-tags-column 100)
   (defun my-org-confirm-babel-evaluate (lang body)
     (not (string= lang "scheme")))
   (setq org-confirm-babel-evaluate #'my-org-confirm-babel-evaluate)
@@ -121,196 +108,110 @@
     )
 #+end_src
 * Aesthetic improvement
-** kaolin themes
-#+begin_src emacs-lisp :tangle yes
-  (use-package kaolin-themes
-    :config
-    (load-theme 'kaolin-ocean))
-#+end_src
+** Gruvbox
+   #+begin_src emacs-lisp
+     (use-package gruvbox-theme)
+     (load-theme 'gruvbox-light-soft)
+   #+end_src
 ** smart-mode-line
-#+begin_src emacs-lisp :tangle no
-  (use-package smart-mode-line-atom-one-dark-theme)
+#+begin_src emacs-lisp :tangle yes
   (use-package smart-mode-line
     :config
     (setq sml/theme 'respectful)
     (sml/setup)
     (add-to-list 'sml/replacer-regexp-list '("^~/Dropbox/" ":dbox:")))
 #+end_src
-** doom-modeline
-#+begin_src emacs-lisp
-  (use-package doom-modeline
-    :ensure t
-    :init (doom-modeline-mode 1)
-    :config
-    (setq doom-modeline-lsp t
-          doom-modeline-env-enable-python t
-          doom-modeline-project-detection 'project))
-#+end_src
 ** rainbow-mode
 #+begin_src emacs-lisp
-  (use-package rainbow-mode)
+  (use-package rainbow-mode
+    :defer t)
 #+end_src
 * Utilities setup
 #+begin_src emacs-lisp
-  (use-package general)
+  (use-package general
+    :defer t)
 #+end_src
-** elfeed
-   #+begin_src emacs-lisp
-     (use-package elfeed
-       :config
-       (setq elfeed-db-directory "~/Dropbox/.elfeed"))
-     (use-package elfeed-org
-       :config
-       (elfeed-org))
-
-     (defun elfeed-play-with-mpv ()
-       "Play entry link with mpv."
-       (interactive)
-       (let ((entry (if (eq major-mode 'elfeed-show-mode) elfeed-show-entry (elfeed-search-selected :single)))
-             (quality-arg "")
-             (quality-val (completing-read "Max height resolution (0 for unlimited): " '("0" "480" "720") nil nil)))
-         (setq quality-val (string-to-number quality-val))
-         (message "Opening %s with height≤%s with mpv..." (elfeed-entry-link entry) quality-val)
-         (when (< 0 quality-val)
-           (setq quality-arg (format "--ytdl-format=[height<=?%s]" quality-val)))
-         (start-process "elfeed-mpv" nil "mpv" quality-arg (elfeed-entry-link entry))))
-
-     (defvar elfeed-mpv-patterns
-       '("youtu\\.?be")
-       "List of regexp to match against elfeed entry link to know
-     whether to use mpv to visit the link.")
-
-     (defun elfeed-visit-or-play-with-mpv ()
-       "Play in mpv if entry link matches `elfeed-mpv-patterns', visit otherwise.
-     See `elfeed-play-with-mpv'."
-       (interactive)
-       (let ((entry (if (eq major-mode 'elfeed-show-mode) elfeed-show-entry (elfeed-search-selected :single)))
-             (patterns elfeed-mpv-patterns))
-         (while (and patterns (not (string-match (car elfeed-mpv-patterns) (elfeed-entry-link entry))))
-           (setq patterns (cdr patterns)))
-         (if patterns
-             (elfeed-play-with-mpv)
-           (if (eq major-mode 'elfeed-search-mode)
-               (elfeed-search-browse-url)
-             (elfeed-show-visit))))) 
-   #+end_src
-** pdf-tools
-   #+begin_src emacs-lisp
-     (use-package pdf-tools   
-       :config   (pdf-tools-install)   
-       (setq-default pdf-view-display-size 'fit-page))
-   #+end_src
-** Org-noter
-   #+begin_src emacs-lisp
-     (use-package org-noter
-       :config
-       (setq org-noter-notes-search-path '("~/Dropbox/brain/notes")))
-
-     (defun org-noter--insert-heading (level title &optional newlines-number location)
-       "Insert a new heading at LEVEL with TITLE.
-     The point will be at the start of the contents, after any
-     properties, by a margin of NEWLINES-NUMBER."
-       (setq newlines-number (or newlines-number 1))
-       (org-insert-heading nil t)
-       (let* ((initial-level (org-element-property :level (org-element-at-point)))
-              (changer (if (> level initial-level) 'org-do-demote 'org-do-promote))
-              (number-of-times (abs (- level initial-level))))
-         (dotimes (_ number-of-times) (funcall changer))
-         (insert (org-trim (replace-regexp-in-string "\n" " " title)))
-
-         (org-end-of-subtree)
-         (unless (bolp) (insert "\n"))
-         (org-N-empty-lines-before-current (1- newlines-number))
-         (org-entry-put nil "ANKI_DECK" "Default")
-         (org-entry-put nil "ANKI_NOTE_TYPE" "Basic")
-         (org-entry-put nil "ANKI_TAGS" "")
-         (when location
-           (org-entry-put nil org-noter-property-note-location (org-noter--pretty-print-location location))
-
-           (when org-noter-doc-property-in-notes
-             (org-noter--with-valid-session
-              (org-entry-put nil org-noter-property-doc-file (org-noter--session-property-text session))
-              (org-entry-put nil org-noter--property-auto-save-last-location "nil"))))
-
-         (run-hooks 'org-noter-insert-heading-hook)))
-   #+end_src
-** anki-editor
-   #+begin_src emacs-lisp
-     (use-package anki-editor)
-     (setq request-log-level 'debug)
-   #+end_src
 ** Org-download
    #+begin_src emacs-lisp
-     (use-package org-download)
-     (setq-default org-download-image-dir "~/Dropbox/brain/image")
-     (when (my-system-type-is-windows)
-       (setq org-download-screenshot-method "magick convert clipboard: %s")
+     (use-package org-download
+       :defer t
+       :config 
+       (setq-default org-download-image-dir "~/Dropbox/brain/image")
+       (when (my-system-type-is-windows)
+       (setq org-download-screenshot-method "magick convert clipboard: %s"))
        )
    #+end_src
 ** Org-roam
 #+begin_src emacs-lisp
-  (use-package org-roam
-    :hook 
-    (after-init . org-roam-mode)
-    :custom
-    (org-roam-directory "~/Dropbox/brain")
-    :bind (:map org-roam-mode-map
-                (("C-c r l" . org-roam)
-                 ("C-c r f" . org-roam-find-file)
-                 ("C-c r g" . org-roam-show-graph))
-                :map org-mode-map
-                (("C-c r i" . org-roam-insert)
-                 ("C-c r c" . org-roam-capture))))
-  (use-package company-org-roam
-    :straight (:host github :repo "jethrokuan/company-org-roam")
-    :config
-    (push 'company-org-roam company-backends))
-  (when (my-system-type-is-gnu)
-    (setq org-roam-graph-executable "/usr/bin/dot"))
-  (when (my-system-type-is-windows)
-    (setq org-roam-graph-executable "c:/Program Files (x86)/Graphviz2.38/bin/dot"))
-  (setq org-roam-capture-templates
-        '(("d" "default" plain (function org-roam--capture-get-point)
-          "%?"
-          :file-name "%<%Y%m%d%H%M%S>-${slug}"
-          :head "#+TITLE: ${title}\n"
-          :unnarrowed t)
-         ("c" "from notes" plain (function org-roam--capture-get-point)
-          "%i"
-          :file-name "%<%Y%m%d%H%M%S>-${slug}"
-          :head "#+TITLE: ${title}\n"
-          :unnarrowed t))
-        )
-  (require 'org-roam-protocol)
+    (use-package org-roam
+      :defer t
+      :custom
+      (org-roam-directory "~/Dropbox/brain"))
+    (use-package company-org-roam
+      :straight (:host github :repo "jethrokuan/company-org-roam")
+      :defer t
+      :config
+      (push 'company-org-roam company-backends))
+    (when (my-system-type-is-gnu)
+      (setq org-roam-graph-executable "/usr/bin/dot"))
+    (when (my-system-type-is-windows)
+      (setq org-roam-graph-executable "c:/Program Files (x86)/Graphviz2.38/bin/fdp.exe")
+      (setenv "TMP" "C:\\Users\\VNHANGU19\\AppData\\Local\\Temp"))
 
-  (defun my/org-roam--backlinks-list-with-content (file)
-    (with-temp-buffer
-      (if-let* ((backlinks (org-roam--get-backlinks file))
-                (grouped-backlinks (--group-by (nth 0 it) backlinks)))
-          (progn
-            (insert (format "\n\n* %d Backlinks\n"
-                            (length backlinks)))
-            (dolist (group grouped-backlinks)
-              (let ((file-from (car group))
-                    (bls (cdr group)))
-                (insert (format "** [[file:%s][%s]]\n"
-                                file-from
-                                (org-roam--get-title-or-slug file-from)))
-                (dolist (backlink bls)
-                  (pcase-let ((`(,file-from _ ,props) backlink))
-                    (insert (s-trim (s-replace "\n" " " (plist-get props :content))))
-                    (insert "\n\n")))))))
-      (buffer-string)))
+  (setq org-roam-graph-extra-config '(("overlap" . "false")
+                                  
+                                      ("splines" . "true")
+                                      ))
+  (setq org-roam-graph-node-extra-config '(("shape" . "circle")
+                                           ("style" . "rounded,fileled")
+                                           ("fillcolor" . "#EEEEEE")
+                                           ("color" . "#C9C9C9")
+                                           ("fontcolor" . "#111111")))
+  (setq org-roam-graph-shorten-titles 'wrap)
+  (setq org-roam-graph-max-title-length 50)
+  (setq org-roam-graph-viewer "C:/Program Files/Mozilla Firefox/firefox.exe")
+
+    (setq org-roam-capture-templates
+          '(("d" "default" plain (function org-roam--capture-get-point)
+            "%?"
+            :file-name "%<%Y%m%d%H%M%S>-${slug}"
+            :head "#+TITLE: ${title}\n"
+            :unnarrowed t)
+           ("c" "from notes" plain (function org-roam--capture-get-point)
+            "%i"
+            :file-name "%<%Y%m%d%H%M%S>-${slug}"
+            :head "#+TITLE: ${title}\n"
+            :unnarrowed t))
+          )
+    (require 'org-roam-protocol)
+    (defun my/org-roam--backlinks-list-with-content (file)
+      (with-temp-buffer
+        (if-let* ((backlinks (org-roam--get-backlinks file))
+                  (grouped-backlinks (--group-by (nth 0 it) backlinks)))
+            (progn
+              (insert (format "\n\n* %d Backlinks\n"
+                              (length backlinks)))
+              (dolist (group grouped-backlinks)
+                (let ((file-from (car group))
+                      (bls (cdr group)))
+                  (insert (format "** [[file:%s][%s]]\n"
+                                  file-from
+                                  (org-roam--get-title-or-slug file-from)))
+                  (dolist (backlink bls)
+                    (pcase-let ((`(,file-from _ ,props) backlink))
+                      (insert (s-trim (s-replace "\n" " " (plist-get props :content))))
+                      (insert "\n\n")))))))
+        (buffer-string)))
 
 
-  (defun my/org-export-preprocessor (backend)
-    (let ((links (my/org-roam--backlinks-list-with-content (buffer-file-name))))
-      (unless (string= links "")
-        (save-excursion
-          (goto-char (point-max))
-          (insert (concat "\n* Backlinks\n") links)))))
+    (defun my/org-export-preprocessor (backend)
+      (let ((links (my/org-roam--backlinks-list-with-content (buffer-file-name))))
+        (unless (string= links "")
+          (save-excursion
+            (goto-char (point-max))
+            (insert (concat "\n* Backlinks\n") links)))))
 
-  (add-hook 'org-export-before-processing-hook 'my/org-export-preprocessor)
+    (add-hook 'org-export-before-processing-hook 'my/org-export-preprocessor)
 
 #+end_src
 ** Org-capture advice
@@ -335,18 +236,13 @@
        (goto-char (point-min)))
 
      (setq org-capture-templates '(("j" "Journal entry" entry (function org-journal-find-location)
-                                    "* %(format-time-string org-journal-time-format)%^{Title}\n%i%?")))
-   #+end_src
-** Org-journal
-   #+begin_src emacs-lisp
-     (use-package org-journal)
-     (setq org-journal-dir "~/Dropbox/brain/journals")
-     (setq org-journal-date-format "%A, %d %B %Y")
-     (setq org-journal-file-type 'weekly)
-     (setq org-journal-file-format "%Y%m%d.org")
+                                    "* %(format-time-string org-journal-time-format)%^{Title}\n%i%?")
+                                   ("w" "Web site" entry
+       (file "")
+       "* %a :website:\n\n%U %?\n\n%:initial")))
    #+end_src
 ** evil
- #+begin_src emacs-lisp :tangle no
+ #+begin_src emacs-lisp :tangle yes
   (use-package evil
     :init
     (setq evil-disable-insert-state-bindings t
@@ -371,348 +267,71 @@
        :config
        (evil-collection-init))
    #+end_src
-** Corral
-#+begin_src emacs-lisp
-    (use-package corral
-      :config
-      (global-set-key (kbd "M-9") 'corral-parentheses-backward)
-      (global-set-key (kbd "M-0") 'corral-parentheses-forward)
-      (global-set-key (kbd "M-[") 'corral-brackets-backward)
-      (global-set-key (kbd "M-]") 'corral-brackets-forward)
-      (global-set-key (kbd "M-{") 'corral-braces-backward)
-      (global-set-key (kbd "M-}") 'corral-braces-forward)
-      (global-set-key (kbd "M-\"") 'corral-double-quotes-backward))
-#+end_src
-** lispy
-#+begin_src emacs-lisp :tangle yes
-  (use-package lispy
-    :config
-    (add-hook 'emacs-lisp-mode-hook (lambda () (lispy-mode 1)))
-    (add-hook 'scheme-mode-hook (lambda () (lispy-mode 1))))
-#+end_src
-** Acewindows
-#+begin_src emacs-lisp
-  (use-package ace-window
-    :init
-    (setq aw-background t)
-    (setq aw-keys '(?a ?r ?s ?t ?d ?h ?n ?e ?i))
-    (setq aw-dispatch-always t))
-  (defvar aw-dispatch-alist
-    '((?x aw-delete-window "Delete Window")
-          (?m aw-swap-window "Swap Windows")
-          (?M aw-move-window "Move Window")
-          (?c aw-copy-window "Copy Window")
-          (?j aw-switch-buffer-in-window "Select Buffer")
-          (?l aw-flip-window)
-          (?u aw-switch-buffer-other-window "Switch Buffer Other Window")
-          (?k aw-split-window-fair "Split Fair Window")
-          (?v aw-split-window-vert "Split Vert Window")
-          (?b aw-split-window-horz "Split Horz Window")
-          (?o delete-other-windows "Delete Other Windows")
-          (?? aw-show-dispatch-help))
-    "List of actions for `aw-dispatch-default'.")
-  (global-set-key (kbd "M-o") 'ace-window)
-#+end_src
-** winnum mode
-#+begin_src emacs-lisp
-  (use-package winum
-    :config
-    (winum-mode)
-    (winum-set-keymap-prefix (kbd "C-c")))
-#+end_src
-** geiser
-#+begin_src emacs-lisp :tangle yes
-  (use-package geiser
-    :config
-    (setq geiser-active-implementations '(guile))
-    )
-#+end_src
-** Bookmark plus
-#+begin_src emacs-lisp
-  (use-package bookmark+)
-#+end_src
-** org-source code
-#+begin_src emacs-lisp
-  (org-babel-do-load-languages
-   'org-babel-load-languages
-   '(
-     (scheme . t)))
-#+end_src
-** sicp book
-#+begin_src emacs-lisp
-  (use-package sicp)
-#+end_src
-** hyperbole
-#+begin_src emacs-lisp
-  (use-package hyperbole)
-#+end_src
-** ivy and counsel bundle
-#+begin_src emacs-lisp
-  (use-package ivy
-    :diminish ivy-mode
-    :config
-    (ivy-mode 1)
-    (setq ivy-use-virtual-buffers t)
-    (setq ivy-count-format "(%d/%d) ")
-    (setq enable-recursive-minibuffers t)
-    (setq ivy-initial-inputs-alist nil))
-  (use-package counsel
-    :diminish counsel-mode
-    :config
-    (counsel-mode 1))
-  (use-package avy)
-#+end_src
-** autocompletion with company-mode
-#+begin_src emacs-lisp
-  (use-package company
-      :config
-      (setq company-idle-delay 0.0
-            company-minimum-prefix-length 1)
-      (global-company-mode))
-#+end_src
-** whichkey
-#+begin_src emacs-lisp
-  (use-package which-key
-    :config
-    (which-key-mode))
-#+end_src
-** smartparens
-#+begin_src emacs-lisp
-  (use-package smartparens
-    :config
-    (smartparens-global-mode)
-    (require 'smartparens-config))
-#+end_src
-** org-bullets
-#+begin_src emacs-lisp
-  (use-package org-superstar
-    :config (add-hook 'org-mode-hook (lambda () (org-superstar-mode 1))))
-  (setq inhibit-compacting-font-caches t)
-  (setq org-hide-emphasis-markers t)
-  (setq org-superstar-headline-bullets-list (quote ("◉" "◆" "✚" "☀" "○")))
-#+end_src
-** undo-fu
-#+begin_src emacs-lisp
-  (use-package undo-fu)
-#+end_src
-** deadgrep
-#+begin_src emacs-lisp
-  (use-package deadgrep)
-#+end_src
-** org-mode gtd
-*** settings
-#+begin_src emacs-lisp
-  (require 'org-habit)
-  (setq spacemacs-theme-org-agenda-height nil
-        org-agenda-start-day "-1d"
-        org-agenda-skip-scheduled-if-done t
-        org-agenda-skip-deadline-if-done t
-        org-agenda-include-deadlines t
-        org-agenda-include-diary t
-        org-agenda-block-separator nil
-        org-agenda-compact-blocks t
-        org-agenda-start-with-log-mode t
-        org-habit-following-days 7
-        org-habit-preceding-days 10
-        org-habit-show-habits-only-for-today t
-        org-agenda-tags-column -102
-        org-habit-graph-column 50
-        org-clock-out-remove-zero-time-clocks t
-        org-clock-out-when-done t
-        org-clock-persist t)
-  (defun org-journal-find-location ()
-    ;; Open today's journal, but specify a non-nil prefix argument in order to
-    ;; inhibit inserting the heading; org-capture will insert the heading.
-    (org-journal-new-entry t)
-    ;; Position point on the journal's top-level heading so that org-capture
-    ;; will add the new entry as a child entry.
-    (goto-char (point-min)))
-#+end_src
-** deft and zetteldeft
-#+begin_src emacs-lisp
-  (use-package deft
-    :init
-    (setq deft-extensions '("org" "md")
-          deft-recursive t
-          deft-directory "~/dropbox/archives"
-          deft-use-filename-as-title t
-          deft-file-naming-rules '((noslash . "-")
-                                   (nospace . "-")
-                                   (case-fn . downcase))))
-  (use-package zetteldeft
-    :after deft)
-#+end_src
-** MPdel
-#+begin_src emacs-lisp
-  (use-package mpdel
-    :config
-    (mpdel-mode))
-#+end_src
-* Helper functions
-** copy-line
-#+begin_src emacs-lisp
-  (defun copy-line (arg)
-    "copy lines (as many as prefix argument) in the kill ring.
-      ease of use features:
-      - move to start of next line.
-      - appends the copy on sequential calls.
-      - use newline as last char even on the last line of the buffer.
-      - if region is active, copy its lines."
-    (interactive "p")
-    (let ((beg (line-beginning-position))
-          (end (line-end-position arg)))
-      (when mark-active
-        (if (> (point) (mark))
-            (setq beg (save-excursion (goto-char (mark)) (line-beginning-position)))
-          (setq end (save-excursion (goto-char (mark)) (line-end-position)))))
-      (if (eq last-command 'copy-line)
-          (kill-append (buffer-substring beg end) (< end beg))
-        (kill-ring-save beg end)))
-    (kill-append "\n" nil)
-    (beginning-of-line (or (and arg (1+ arg)) 2))
-    (if (and arg (not (= 1 arg))) (message "%d lines copied" arg)))
+** Ivy
+   #+begin_src emacs-lisp
+     (use-package ivy
+       :config
+       (ivy-mode 1))
+     (use-package counsel
+       :config
+       (counsel-mode 1))
+   #+end_src
+** ESUP
+   #+begin_src emacs-lisp
+     (use-package esup)
+   #+end_src
+**
 
-  (defun create-cloze ()
-    (save-excursion
-      (set-mark
-       (let ((beg (org-element-property :contents-begin (org-element-at-point)))
-             (end (org-element-property :contents-end (org-element-at-point))))
-         (kill-region beg end))
-       )
-      )
-    )
-
-  (defun create-headline (title level)
-    (org-element-interpret-data `(headline (:level ,level :title ,title))))
-
-  (defun my/create-cloze ()
-    (interactive)
-    (save-excursion
-      (let ((beg (org-element-property :contents-begin (org-element-at-point)))
-            (end (org-element-property :contents-end (org-element-at-point)))
-            (level (org-element-property :level (org-element-at-point))))
-        (goto-char beg)
-        (when (eq 'property-drawer (car (org-element-at-point)))
-          (goto-char (org-element-property :end (org-element-at-point)))
-          )
-        (kill-region (point) end)
-        (let ((headline (create-headline "Text" (+ level 1))))
-          (insert headline)
-          (insert (car kill-ring-yank-pointer))
-          )
-        )
-      )
-    )
-
-  (defun my/create-basic ()
-    (interactive)
-    (save-excursion
-      (let ((beg (org-element-property :contents-begin (org-element-at-point)))
-            (end (org-element-property :contents-end (org-element-at-point)))
-            (level (org-element-property :level (org-element-at-point))))
-        (goto-char beg)
-        (when (eq 'property-drawer (car (org-element-at-point)))
-          (goto-char (org-element-property :end (org-element-at-point)))
-          )
-        (kill-region (point) end)
-        (let ((headline-front (create-headline "Front" (+ level 1)))
-              (headline-back (create-headline "Back" (+ level 1))))
-          (insert headline-front)
-          (insert "\n")
-          (insert headline-back)
-          (insert (car kill-ring-yank-pointer))
-          )
-        )
-      )
-    )
-
-;; TODO: I want to change between 2 type of card
-
-  (defun my/create-flashcard ()
-    (interactive)
-    (let ((card-type (completing-read "Choose the card type: " '("Cloze" "Basic" ) nil nil)))
-      (cond ((string= "Cloze" card-type) (my/create-cloze))
-            ((string= "Basic" card-type) (my/create-basic)))
-      ))
-#+end_src
+** Whichkey
+   #+begin_src emacs-lisp
+     (use-package which-key
+       :config
+       (which-key-mode 1))
+   #+end_src
+** Company-mode
+   #+begin_src emacs-lisp
+     (use-package company
+       :defer t
+       :init
+       (add-hook 'after-init-hook 'global-company-mode))
+     (setq company-minimum-prefix-length 1
+           company-idle-delay 0.0) ;; default is 0.2
+   #+end_src
+** Python
+   #+begin_src emacs-lisp :tangle no
+     (use-package lsp-mode
+         :hook (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
+                 (python-mode . lsp)
+                 ;; if you want which-key integration
+                 (lsp-mode . lsp-enable-which-key-integration))
+         :commands lsp)
+     (setq lsp-prefer-capf t)
+     (use-package pyvenv)
+   #+end_src
+** Elpy
+   #+begin_src emacs-lisp
+     (use-package elpy
+       :init (elpy-enable))
+   #+end_src
 * Keybindings
-#+begin_src emacs-lisp
-    (defun my-counsel-p4 ()
-      (interactive)
-      (let ((counsel-fzf-cmd "find ~/Dropbox/Calibre | grep -e pdf | fzf -f \"%s\""))
-        (counsel-fzf)))
-
-    (general-define-key "<menu>" (general-simulate-key "C-c"))
-    (general-define-key
-     "C-z" 'undo-fu-only-undo
-     "C-s-z" 'undo-fu-only-redo
-     "H-t" 'vterm-toggle)
-
-    (use-package key-chord :config (key-chord-mode t))
-
-  (defun def-rep-command (alist)
-      "Return a lambda that calls the first function of ALIST. It sets the transient map to all functions of ALIST, allowing you to repeat those functions as needed."
-      (lexical-let ((keymap (make-sparse-keymap))
-                    (func (cdar alist)))
-        (mapc (lambda (x)
-                (when x
-                  (define-key keymap (kbd (car x)) (cdr x))))
-              alist)
-        (lambda (arg)
-          (interactive "p")
-          (when func
-            (funcall func arg))
-          (set-transient-map keymap t))))
-
-  (key-chord-define-global "yy"   
-        (def-rep-command
-         '(nil
-           ("n" . windmove-left)
-           ("i" . windmove-right)
-           ("e" . windmove-down)
-           ("u" . windmove-up)
-           ("y" . other-window)
-           ("h" . ace-window)
-           ("s" . (lambda () (interactive) (ace-window 4)))
-           ("d" . (lambda () (interactive) (ace-window 16)))
-           ("-" . text-scale-decrease)
-           ("=" . text-scale-decrease)
-           )))
-
-  (general-create-definer my-leader-def
-    :prefix "C-c")
-  (my-leader-def
-    "" 'nil
-    "SPC" 'counsel-M-x
-    "." 'counsel-find-file
-    "j" 'avy-goto-char-timer
-    "l" '(:ignore t :wk "elfeed")
-    "lo" 'elfeed-visit-or-play-with-mpv
-    "le" 'elfeed
-    "lu" 'elfeed-update
-    "f" 'my-counsel-p4
-    "c" 'org-capture 
-    "b" '(:ignore t :wk "Buffer")
-    "bb" 'switch-to-buffer
-    "bk" 'kill-buffer
-    "bi" 'ibuffer
-    "bw" '(switch-to-buffer-other-window :wk "Other windows")
-    "b." 'next-buffer
-    "b," 'previous-buffer
-    "m" '(:ignore t :wk "MPdel")
-    "mp" 'libmpdel-playback-play-pause
-    "mn" 'libmpdel-playback-next
-    "mp" 'libmpdel-playback-previous
-    "e" 'windmove-down
-    "i" 'windmove-right
-    "n" 'windmove-left
-    "u" 'windmove-up
-    "y" 'other-window
-    "w" '(:ignore t :wk "windows")
-    "wD" 'delete-window
-    "wd" '(lambda () (interactive) (ace-window 16))
-    "-" 'text-scale-decrease
-    "k" 'copy-line
-    "=" 'text-scale-increase
-    )
-#+end_src
+  #+begin_src emacs-lisp
+    (general-create-definer my-leader-def
+      :states '(normal motion visual)
+      :prefix "SPC")
+  #+end_src
+** Global keybindings
+   #+begin_src emacs-lisp
+     (my-leader-def
+       :keymaps 'override
+       "." 'counsel-find-file
+       "o" '(:ignore t :wk "Org-mode")
+       "oa" 'org-agenda
+       "oc" 'org-capture
+       "n" '(:ignore t :wk "Notes")
+       "nr" '(:ignore t :wk "Roams")
+       "nrr" 'org-roam
+       "nrf" 'org-roam-find-file
+       "nrc" 'org-roam-capture
+       "nrg" 'org-roam-graph
+       "nri" 'org-roam-insert)
+   #+end_src
