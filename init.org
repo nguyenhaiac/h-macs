@@ -157,10 +157,23 @@
    #+begin_src emacs-lisp
      (use-package elfeed
        :config
-       (setq elfeed-db-directory "~/Dropbox/.elfeed"))
-     (use-package elfeed-org
+       (setq elfeed-db-directory "~/.cache/.elfeed"))
+
+     (use-package elfeed-protocol
        :config
-       (elfeed-org))
+       (elfeed-protocol-enable))
+
+     (setq elfeed-protocol-ttrss-maxsize 200) ; bigger than 200 is invalid
+     (setq elfeed-feeds (list
+                         (list "ttrss+https://admin@rss.nguyen-hai.com/tt-rss"
+                               :password (password-store-get "rss.textualbeing.com/admin")
+                               )))
+
+     (add-hook 'elfeed-new-entry-hook
+               (elfeed-make-tagger :feed-url "youtube\\.com"
+                                   :add '(video youtube))
+               (elfeed-make-tagger :feed-title "Python"
+                                   :add '(python programming)))
 
      (defun elfeed-play-with-mpv ()
        "Play entry link with mpv."
@@ -192,6 +205,10 @@
            (if (eq major-mode 'elfeed-search-mode)
                (elfeed-search-browse-url)
              (elfeed-show-visit))))) 
+   #+end_src
+** Password-store-get
+   #+begin_src emacs-lisp
+     (use-package password-store)
    #+end_src
 ** pdf-tools
    #+begin_src emacs-lisp
