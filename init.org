@@ -121,12 +121,11 @@
     )
 #+end_src
 * Aesthetic improvement
-** kaolin themes
-#+begin_src emacs-lisp :tangle yes
-  (use-package kaolin-themes
-    :config
-    (load-theme 'kaolin-ocean))
-#+end_src
+** Theme
+   #+begin_src emacs-lisp
+     (use-package doom-themes)
+     (load-theme 'doom-gruvbox-light)
+   #+end_src
 ** smart-mode-line
 #+begin_src emacs-lisp :tangle yes
   (use-package smart-mode-line-atom-one-dark-theme)
@@ -345,44 +344,6 @@
      (setq org-journal-file-type 'weekly)
      (setq org-journal-file-format "%Y%m%d.org")
    #+end_src
-** evil
- #+begin_src emacs-lisp :tangle no
-  (use-package evil
-    :init
-    (setq evil-disable-insert-state-bindings t
-          evil-want-C-i-jump t
-          evil-want-C-u-scroll t
-          evil-want-integration t
-          evil-want-keybinding nil)
-    :config
-    (evil-set-initial-state 'magit-mode 'emacs)
-    (evil-set-initial-state 'dired-mode 'emacs)
-    (evil-set-initial-state 'info-mode 'emacs)
-    (evil-mode t))
-
-  (use-package evil-commentary)
-  (evil-commentary-mode)
-#+end_src
-** Evil-collection
-   #+begin_src emacs-lisp :tangle no
-     (use-package evil-collection
-       :after evil
-       :ensure t
-       :config
-       (evil-collection-init))
-   #+end_src
-** Corral
-#+begin_src emacs-lisp
-    (use-package corral
-      :config
-      (global-set-key (kbd "M-9") 'corral-parentheses-backward)
-      (global-set-key (kbd "M-0") 'corral-parentheses-forward)
-      (global-set-key (kbd "M-[") 'corral-brackets-backward)
-      (global-set-key (kbd "M-]") 'corral-brackets-forward)
-      (global-set-key (kbd "M-{") 'corral-braces-backward)
-      (global-set-key (kbd "M-}") 'corral-braces-forward)
-      (global-set-key (kbd "M-\"") 'corral-double-quotes-backward))
-#+end_src
 ** lispy
 #+begin_src emacs-lisp :tangle yes
   (use-package lispy
@@ -413,13 +374,6 @@
     "List of actions for `aw-dispatch-default'.")
   (global-set-key (kbd "M-o") 'ace-window)
 #+end_src
-** winnum mode
-#+begin_src emacs-lisp
-  (use-package winum
-    :config
-    (winum-mode)
-    (winum-set-keymap-prefix (kbd "C-c")))
-#+end_src
 ** geiser
 #+begin_src emacs-lisp :tangle yes
   (use-package geiser
@@ -441,10 +395,6 @@
 ** sicp book
 #+begin_src emacs-lisp
   (use-package sicp)
-#+end_src
-** hyperbole
-#+begin_src emacs-lisp
-  (use-package hyperbole)
 #+end_src
 ** ivy and counsel bundle
 #+begin_src emacs-lisp
@@ -489,78 +439,15 @@
     :config (add-hook 'org-mode-hook (lambda () (org-superstar-mode 1))))
   (setq inhibit-compacting-font-caches t)
   (setq org-hide-emphasis-markers t)
-  (setq org-superstar-headline-bullets-list (quote ("◉" "◆" "✚" "☀" "○")))
+  (setq org-superstar-headline-bullets-list (quote ("◉" "◆" "☀" "○")))
 #+end_src
 ** undo-fu
 #+begin_src emacs-lisp
   (use-package undo-fu)
 #+end_src
-
 ** deadgrep
 #+begin_src emacs-lisp
   (use-package deadgrep)
-#+end_src
-** org-mode gtd
-*** settings
-#+begin_src emacs-lisp
-  (require 'org-habit)
-  (setq spacemacs-theme-org-agenda-height nil
-        org-agenda-start-day "-1d"
-        org-agenda-skip-scheduled-if-done t
-        org-agenda-skip-deadline-if-done t
-        org-agenda-include-deadlines t
-        org-agenda-include-diary t
-        org-agenda-block-separator nil
-        org-agenda-compact-blocks t
-        org-agenda-start-with-log-mode t
-        org-habit-following-days 7
-        org-habit-preceding-days 10
-        org-habit-show-habits-only-for-today t
-        org-agenda-tags-column -102
-        org-habit-graph-column 50
-        org-clock-out-remove-zero-time-clocks t
-        org-clock-out-when-done t
-        org-clock-persist t)
-  (defun org-journal-find-location ()
-    ;; Open today's journal, but specify a non-nil prefix argument in order to
-    ;; inhibit inserting the heading; org-capture will insert the heading.
-    (org-journal-new-entry t)
-    ;; Position point on the journal's top-level heading so that org-capture
-    ;; will add the new entry as a child entry.
-    (goto-char (point-min)))
-#+end_src
-** deft and zetteldeft
-#+begin_src emacs-lisp
-  (use-package deft
-    :init
-    (setq deft-extensions '("org" "md")
-          deft-recursive t
-          deft-directory "~/dropbox/archives"
-          deft-use-filename-as-title t
-          deft-file-naming-rules '((noslash . "-")
-                                   (nospace . "-")
-                                   (case-fn . downcase))))
-  (use-package zetteldeft
-    :after deft)
-#+end_src
-** MPdel
-#+begin_src emacs-lisp
-  (use-package mpdel
-    :config
-    (mpdel-mode))
-#+end_src
-** Lispyville
-#+begin_src emacs-lisp
-  (use-package lispyville
-    :init
-    (general-add-hook '(emacs-lisp-mode-hook lisp-mode-hook) #'lispyville-mode))
-  (with-eval-after-load 'lispyville
-    (lispyville-set-key-theme
-     '(operators
-       c-w
-       commentary
-       (escape insert)
-       (additional-movement normal visual motion))))
 #+end_src
 * Programming setup
 ** magit - the king of git
@@ -585,17 +472,6 @@
 ** pyvenv
 #+begin_src emacs-lisp :tangle yes
   (use-package pyvenv)
-#+end_src
-** c programming setup
-#+begin_src emacs-lisp :tangle yes
-  (use-package company-irony
-    :config
-    (add-to-list 'company-backends 'company-irony))
-
-  (use-package irony
-    :hook ((c++-mode-hook . irony-mode)
-           (c-mode-hook . irony-mode)
-           (irony-mode-hook . irony-cdb-autosetup-compile-options)))
 #+end_src
 ** vterm
 #+begin_src emacs-lisp :tangle yes
@@ -697,7 +573,6 @@
       )
     )
 
-  ;; TODO: I want to change between 2 type of card
 
 
   (defun my/create-flashcard ()
@@ -714,50 +589,17 @@
       (let ((counsel-fzf-cmd "find ~/Dropbox/Calibre | grep -e pdf | fzf -f \"%s\""))
         (counsel-fzf)))
 
-    (general-define-key "<menu>" (general-simulate-key "C-c"))
-    (general-define-key
-     "C-z" 'undo-fu-only-undo
-     "C-s-z" 'undo-fu-only-redo
-     "H-t" 'vterm-toggle)
 
-    (use-package key-chord :config (key-chord-mode t))
+  (general-define-key
+   "C-z" 'undo-fu-only-undo
+   "C-s-z" 'undo-fu-only-redo
+   "H-t" 'vterm-toggle)
 
-  (defun def-rep-command (alist)
-      "Return a lambda that calls the first function of ALIST. It sets the transient map to all functions of ALIST, allowing you to repeat those functions as needed."
-      (lexical-let ((keymap (make-sparse-keymap))
-                    (func (cdar alist)))
-        (mapc (lambda (x)
-                (when x
-                  (define-key keymap (kbd (car x)) (cdr x))))
-              alist)
-        (lambda (arg)
-          (interactive "p")
-          (when func
-            (funcall func arg))
-          (set-transient-map keymap t))))
-
-  (key-chord-define-global "yy"   
-        (def-rep-command
-         '(nil
-           ("n" . windmove-left)
-           ("i" . windmove-right)
-           ("e" . windmove-down)
-           ("u" . windmove-up)
-           ("y" . other-window)
-           ("h" . ace-window)
-           ("s" . (lambda () (interactive) (ace-window 4)))
-           ("d" . (lambda () (interactive) (ace-window 16)))
-           ("-" . text-scale-decrease)
-           ("=" . text-scale-decrease)
-           )))
 
   (general-create-definer my-leader-def
     :prefix "C-c")
 
   (my-leader-def
-    "" 'nil
-    "SPC" 'counsel-M-x
-    "." 'counsel-find-file
     "j" 'avy-goto-char-timer
     "l" '(:ignore t :wk "elfeed")
     "lo" 'elfeed-visit-or-play-with-mpv
@@ -772,17 +614,51 @@
     "bw" '(switch-to-buffer-other-window :wk "Other windows")
     "b." 'next-buffer
     "b," 'previous-buffer
-    "m" '(:ignore t :wk "MPdel")
-    "mp" 'libmpdel-playback-play-pause
-    "mn" 'libmpdel-playback-next
-    "mp" 'libmpdel-playback-previous
     "w" '(:ignore t :wk "windows")
     "wD" 'delete-window
+    "wn" 'windmove-left
+    "wi" 'windmove-right
+    "we" 'windmove-down
+    "wu" 'windmove-up
+    "ww" 'ace-window
     "wd" '(lambda () (interactive) (ace-window 16))
+    "ws" '(lambda () (interactive) (ace-window 4))
     "k" 'copy-line
-    "/" 'anki-editor-cloze-region
+    "-" 'text-scale-decrease
+    "=" 'text-scale-increase
     )
-
+  (my-leader-def
+    "j" 'avy-goto-char-timer
+    "l" '(:ignore t :wk "elfeed")
+    "lo" 'elfeed-visit-or-play-with-mpv
+    "le" 'elfeed
+    "lu" 'elfeed-update
+    "f" 'my-counsel-p4
+    "c" 'org-capture 
+    "b" '(:ignore t :wk "Buffer")
+    "bb" 'switch-to-buffer
+    "bk" 'kill-buffer
+    "bi" 'ibuffer
+    "bw" '(switch-to-buffer-other-window :wk "Other windows")
+    "b." 'next-buffer
+    "b," 'previous-buffer
+    "w" '(:ignore t :wk "windows")
+    "wD" 'delete-window
+    "wn" 'windmove-left
+    "wi" 'windmove-right
+    "we" 'windmove-down
+    "wu" 'windmove-up
+    "ww" 'ace-window
+    "wd" '(lambda () (interactive) (ace-window 16))
+    "ws" '(lambda () (interactive) (ace-window 4))
+    "k" 'copy-line
+    "-" 'text-scale-decrease
+    "=" 'text-scale-increase
+    "o" '(:ignore t :wk "other")
+    "ot" '(vterm-toggle)
+    "g" '(:ignore t :wk "magit")
+    "gg" 'magit-status
+    )
 #+end_src
 
 
