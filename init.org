@@ -162,12 +162,19 @@
      (use-package elfeed-protocol
        :config
        (elfeed-protocol-enable))
-
+     (use-package password-store)
      (setq elfeed-protocol-ttrss-maxsize 200) ; bigger than 200 is invalid
-     (setq elfeed-feeds (list
+     (when (my-system-type-is-gnu)
+       (setq elfeed-feeds (list
+                           (list "ttrss+https://admin@rss.nguyen-hai.com/tt-rss"
+                                 :password (password-store-get "rss.textualbeing.com/admin")))))
+
+     (when (my-system-type-is-windows)
+       (setq elfeed-feeds (list
                          (list "ttrss+https://admin@rss.nguyen-hai.com/tt-rss"
-                               :password (password-store-get "rss.textualbeing.com/admin")
-                               )))
+                               :password-file "~/.pass"))))
+
+
 
      (add-hook 'elfeed-new-entry-hook
                (elfeed-make-tagger :feed-url "youtube\\.com"
