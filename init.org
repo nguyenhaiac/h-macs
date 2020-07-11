@@ -32,9 +32,11 @@
 (add-hook 'after-save-hook #'my--tangle-org)
 
 #+end_src
+
 ** Bootstrap straight.el
 *** install straight.el if not yet
-#+begin_src emacs-lisp :tangle yes
+
+    #+begin_src emacs-lisp :tangle yes
 (defvar bootstrap-version)
 (let ((bootstrap-file
        (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
@@ -47,17 +49,21 @@
       (goto-char (point-max))
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
-#+end_src
+
+  #+end_src
+  
 *** install use-package and set it to use straight by default
-#+begin_src emacs-lisp :tangle yes
-(straight-use-package 'use-package)
-(setq straight-use-package-by-default t)
-(straight-use-package 'org-plus-contrib)
-#+end_src
+
+    #+begin_src emacs-lisp :tangle yes
+  (straight-use-package 'use-package)
+  (setq straight-use-package-by-default t)
+  (straight-use-package 'org-plus-contrib)
+  #+end_src
+  
 ** Better-default 
 #+begin_src emacs-lisp
   (setq
-   default-frame-alist '((font . "CaskaydiaCove NF-10"))
+   default-frame-alist '((font . "Hack Nerd Font-10"))
    tool-bar-mode nil
    menu-bar-mode nil)
 #+end_src
@@ -120,14 +126,21 @@
     (string-equal system-type "gnu/linux")
     )
 #+end_src
+
 * Aesthetic improvement
 ** Theme
    #+begin_src emacs-lisp
-     (use-package doom-themes)
-     (load-theme 'doom-gruvbox-light)
+     ;; (use-package doom-themes)
+     ;; (load-theme 'doom-gruvbox)
+     (use-package gruvbox-theme
+       :straight (gruvbox-theme :type git
+                                :host github
+                                :repo "greduan/emacs-theme-gruvbox"
+                                ))
+     (load-theme 'gruvbox)
    #+end_src
 ** smart-mode-line
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle no
   (use-package smart-mode-line-atom-one-dark-theme)
   (use-package smart-mode-line
     :config
@@ -136,7 +149,7 @@
     (add-to-list 'sml/replacer-regexp-list '("^~/Dropbox/" ":dbox:")))
 #+end_src
 ** doom-modeline
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle yes
   (use-package doom-modeline
     :ensure t
     :init (doom-modeline-mode 1)
@@ -149,10 +162,87 @@
 #+begin_src emacs-lisp
   (use-package rainbow-mode)
 #+end_src
-* Utilities setup
+* Keybindings
+  
 #+begin_src emacs-lisp
   (use-package general)
-#+end_src
+  (general-evil-setup)
+
+  (general-create-definer my-leader-def
+      :states '(normal visual insert emacs)
+      :keymaps 'override
+      :prefix "SPC"
+      :non-normal-prefix "C-c")
+
+  (general-create-definer my-local-leader-def
+      :keymaps '(normal visual insert emacs)
+      :prefix "SPC m"
+      :non-normal-prefix "C-c m")
+
+  (defun my-find-book ()
+    (interactive)
+    (let ((counsel-fzf-cmd "find ~/Dropbox/Calibre | grep -e pdf | fzf -f \"%s\""))
+      (counsel-fzf)))
+
+  (my-leader-def
+    "gj" 'avy-goto-char-timer
+    "f" '(:ignore t :wk "files")
+    "ff" 'counsel-find-file
+    "fb" 'my-find-book
+    "fs" 'save-buffer
+    "fp" '(lambda () (interactive) (find-file "~/.emacs.d/init.org"))
+    "fd" 'dired-sidebar-toggle-with-current-directory
+    "c" 'org-capture 
+    "b" '(:ignore t :wk "Buffer")
+    "bb" 'switch-to-buffer
+    "bk" 'kill-buffer
+    "bi" 'ibuffer
+    "bw" '(switch-to-buffer-other-window :wk "Other windows")
+    "b." 'next-buffer
+    "b," 'previous-buffer
+    "-" 'text-scale-decrease
+    "+" 'text-scale-increase
+    )
+  (general-evil-define-key '(normal visual) org-mode-map
+    "ge" 'org-next-visible-heading
+    "gu" 'org-previous-visible-heading)
+    #+end_src
+
+* Utilities setup
+** Dired+
+   #+begin_src emacs-lisp
+     (use-package dired+
+       :init
+       (setq diredp-hide-details-initially-flag nil))
+     (add-hook 'dired-before-readin-hook
+               'diredp-breadcrumbs-in-header-line-mode)
+   #+end_src
+** Dired all the icons
+   #+begin_src emacs-lisp
+     (use-package all-the-icons-dired
+       :straight (all-the-icons-dired :type git
+                                     :host github
+                                     :repo
+                                     "jtbm37/all-the-icons-dired"))
+   #+end_src
+** Dired sidebar
+   #+begin_src emacs-lisp
+     (use-package dired-sidebar
+       :commands (dired-sidebar-toggle-sidebar)
+       :init
+       (add-hook 'dired-sidebar-mode-hook
+                 (lambda ()
+                   (unless (file-remote-p default-directory)
+                     (auto-revert-mode))))
+       :config
+       (push 'toggle-window-split dired-sidebar-toggle-hidden-commands)
+       (push 'rotate-windows dired-sidebar-toggle-hidden-commands)
+
+       (setq dired-sidebar-subtree-line-prefix "__")
+       (setq dired-sidebar-theme 'icons)
+       (setq dired-sidebar-use-term-integration t)
+       (setq dired-sidebar-use-custom-font t))
+   #+end_src
 ** elfeed
    #+begin_src emacs-lisp
      (use-package elfeed
@@ -164,17 +254,10 @@
        (elfeed-protocol-enable))
      (use-package password-store)
      (setq elfeed-protocol-ttrss-maxsize 200) ; bigger than 200 is invalid
-     (when (my-system-type-is-gnu)
-       (setq elfeed-feeds (list
-                           (list "ttrss+https://admin@rss.nguyen-hai.com/tt-rss"
-                                 :password (password-store-get "rss.textualbeing.com/admin")))))
 
-     (when (my-system-type-is-windows)
-       (setq elfeed-feeds (list
-                         (list "ttrss+https://admin@rss.nguyen-hai.com/tt-rss"
-                               :password-file "~/.pass"))))
-
-
+     (setq elfeed-feeds (list
+                          (list "ttrss+https://admin@rss.nguyen-hai.com"
+                                :password (password-store-get "rss.nguyen-hai.com/admin"))))
 
      (add-hook 'elfeed-new-entry-hook
                (elfeed-make-tagger :feed-url "youtube\\.com"
@@ -211,7 +294,14 @@
              (elfeed-play-with-mpv)
            (if (eq major-mode 'elfeed-search-mode)
                (elfeed-search-browse-url)
-             (elfeed-show-visit))))) 
+             (elfeed-show-visit)))))
+
+     (my-leader-def
+       "e" '(:ignore t :wk "elfeed")
+       "eo" 'elfeed-visit-or-play-with-mpv
+       "ee" 'elfeed
+       "eu" 'elfeed-update
+       )
    #+end_src
 ** Password-store-get
    #+begin_src emacs-lisp
@@ -229,33 +319,6 @@
        :config
        (setq org-noter-notes-search-path '("~/Dropbox/brain/notes")))
 
-     (defun org-noter--insert-heading (level title &optional newlines-number location)
-       "Insert a new heading at LEVEL with TITLE.
-     The point will be at the start of the contents, after any
-     properties, by a margin of NEWLINES-NUMBER."
-       (setq newlines-number (or newlines-number 1))
-       (org-insert-heading nil t)
-       (let* ((initial-level (org-element-property :level (org-element-at-point)))
-              (changer (if (> level initial-level) 'org-do-demote 'org-do-promote))
-              (number-of-times (abs (- level initial-level))))
-         (dotimes (_ number-of-times) (funcall changer))
-         (insert (org-trim (replace-regexp-in-string "\n" " " title)))
-
-         (org-end-of-subtree)
-         (unless (bolp) (insert "\n"))
-         (org-N-empty-lines-before-current (1- newlines-number))
-         (org-entry-put nil "ANKI_DECK" "Default")
-         (org-entry-put nil "ANKI_NOTE_TYPE" "Basic")
-         (org-entry-put nil "ANKI_TAGS" "")
-         (when location
-           (org-entry-put nil org-noter-property-note-location (org-noter--pretty-print-location location))
-
-           (when org-noter-doc-property-in-notes
-             (org-noter--with-valid-session
-              (org-entry-put nil org-noter-property-doc-file (org-noter--session-property-text session))
-              (org-entry-put nil org-noter--property-auto-save-last-location "nil"))))
-
-         (run-hooks 'org-noter-insert-heading-hook)))
    #+end_src
 ** anki-editor
    #+begin_src emacs-lisp
@@ -276,14 +339,7 @@
     :hook 
     (after-init . org-roam-mode)
     :custom
-    (org-roam-directory "~/Dropbox/brain")
-    :bind (:map org-roam-mode-map
-                (("C-c r l" . org-roam)
-                 ("C-c r f" . org-roam-find-file)
-                 ("C-c r g" . org-roam-show-graph))
-                :map org-mode-map
-                (("C-c r i" . org-roam-insert)
-                 ("C-c r c" . org-roam-capture))))
+    (org-roam-directory "~/Dropbox/brain"))
   (use-package company-org-roam
     :straight (:host github :repo "jethrokuan/company-org-roam")
     :config
@@ -335,6 +391,12 @@
 
   (add-hook 'org-export-before-processing-hook 'my/org-export-preprocessor)
 
+  (my-leader-def
+    "r" '(:ignore t :wk roam)
+    "rr" 'org-roam
+    "rf" 'org-roam-find-file
+    "ri" 'org-roam-insert
+    "rc" 'org-roam-capture)
 #+end_src
 ** Org-capture advice
    #+begin_src emacs-lisp
@@ -359,14 +421,6 @@
 
      (setq org-capture-templates '(("j" "Journal entry" entry (function org-journal-find-location)
                                     "* %(format-time-string org-journal-time-format)%^{Title}\n%i%?")))
-   #+end_src
-** Org-journal
-   #+begin_src emacs-lisp
-     (use-package org-journal)
-     (setq org-journal-dir "~/Dropbox/brain/journals")
-     (setq org-journal-date-format "%A, %d %B %Y")
-     (setq org-journal-file-type 'weekly)
-     (setq org-journal-file-format "%Y%m%d.org")
    #+end_src
 ** lispy
 #+begin_src emacs-lisp :tangle yes
@@ -397,6 +451,17 @@
           (?? aw-show-dispatch-help))
     "List of actions for `aw-dispatch-default'.")
   (global-set-key (kbd "M-o") 'ace-window)
+  (my-leader-def
+    "w" '(:ignore t :wk "windows")
+    "wD" 'delete-window
+    "wn" 'windmove-left
+    "wi" 'windmove-right
+    "we" 'windmove-down
+    "wu" 'windmove-up
+    "ww" 'ace-window
+    "wd" '(lambda () (interactive) (ace-window 16))
+    "ws" '(lambda () (interactive) (ace-window 4))
+    )
 #+end_src
 ** geiser
 #+begin_src emacs-lisp :tangle yes
@@ -414,7 +479,10 @@
   (org-babel-do-load-languages
    'org-babel-load-languages
    '(
-     (scheme . t)))
+     (scheme . t)
+     (python . t)
+     (shell . t)
+     ))
 #+end_src
 ** sicp book
 #+begin_src emacs-lisp
@@ -476,7 +544,7 @@
 * Programming setup
 ** magit - the king of git
 #+begin_src emacs-lisp :tangle yes
- (use-package magit)
+  (use-package magit)
 #+end_src
 ** python debugging with realgud
 #+begin_src emacs-lisp :tangle yes
@@ -487,11 +555,27 @@
   (use-package lsp-mode
     :if (my-system-type-is-gnu)
     :commands lsp
-    :init
-    (setq lsp-keymap-prefix "C-c l")
     :hook
     (lsp-mode . lsp-enable-which-key-integration)
     (python-mode . lsp))
+
+  (use-package lsp-python-ms
+    :ensure t
+    :init (setq lsp-python-ms-auto-install-server t)
+    :hook (python-mode . (lambda ()
+                           (require 'lsp-python-ms)
+                           (lsp))))  ; or lsp-deferred
+
+  (use-package lsp-ui
+    :config
+    (setq lsp-ui-doc-enable nil
+          lsp-ui-doc-delay 0.1
+          lsp-ui-doc-position 'bottom
+          lsp-ui-peek-enable t))
+
+  (my-local-leader-def
+    "gd" 'lsp-find-definition
+    "gi" 'lsp-find-implementation)
 #+end_src
 ** pyvenv
 #+begin_src emacs-lisp :tangle yes
@@ -516,173 +600,32 @@
 #+begin_src emacs-lisp :tangle yes
   (use-package yaml-mode)
 #+end_src
-* Helper functions
-** copy-line
+* Evil-mode
+  
 #+begin_src emacs-lisp
-  (defun copy-line (arg)
-    "copy lines (as many as prefix argument) in the kill ring.
-      ease of use features:
-      - move to start of next line.
-      - appends the copy on sequential calls.
-      - use newline as last char even on the last line of the buffer.
-      - if region is active, copy its lines."
-    (interactive "p")
-    (let ((beg (line-beginning-position))
-          (end (line-end-position arg)))
-      (when mark-active
-        (if (> (point) (mark))
-            (setq beg (save-excursion (goto-char (mark)) (line-beginning-position)))
-          (setq end (save-excursion (goto-char (mark)) (line-end-position)))))
-      (if (eq last-command 'copy-line)
-          (kill-append (buffer-substring beg end) (< end beg))
-        (kill-ring-save beg end)))
-    (kill-append "\n" nil)
-    (beginning-of-line (or (and arg (1+ arg)) 2))
-    (if (and arg (not (= 1 arg))) (message "%d lines copied" arg)))
+  (use-package evil
+    :init
+    (setq evil-disable-insert-state-bindings t
+          evil-want-C-i-jump t
+          evil-want-C-u-scroll t
+          evil-want-integration t
+          evil-want-keybinding nil)
+    :config
+    (evil-set-initial-state 'magit-mode 'emacs)
+    (evil-set-initial-state 'info-mode 'emacs)
+    (evil-mode t))
 
-  (defun create-cloze ()
-    (save-excursion
-      (set-mark
-       (let ((beg (org-element-property :contents-begin (org-element-at-point)))
-             (end (org-element-property :contents-end (org-element-at-point))))
-         (kill-region beg end))
-       )
-      )
-    )
+  (use-package evil-commentary)
+  (evil-commentary-mode)
 
-
-  (defun create-headline (title level)
-    (org-element-interpret-data `(headline (:level ,level :title ,title))))
-
-
-  (defun my/create-cloze ()
-    (interactive)
-    (save-excursion
-      (let ((beg (org-element-property :contents-begin (org-element-at-point)))
-            (end (org-element-property :contents-end (org-element-at-point)))
-            (level (org-element-property :level (org-element-at-point))))
-        (goto-char beg)
-        (when (eq 'property-drawer (car (org-element-at-point)))
-          (goto-char (org-element-property :end (org-element-at-point)))
-          )
-        (kill-region (point) end)
-        (let ((headline (create-headline "Text" (+ level 1))))
-          (insert headline)
-          (insert (car kill-ring-yank-pointer))
-          )
-        )
-      )
-    )
-
-
-  (defun my/create-basic ()
-    (interactive)
-    (save-excursion
-      (let ((beg (org-element-property :contents-begin (org-element-at-point)))
-            (end (org-element-property :contents-end (org-element-at-point)))
-            (level (org-element-property :level (org-element-at-point))))
-        (goto-char beg)
-        (when (eq 'property-drawer (car (org-element-at-point)))
-          (goto-char (org-element-property :end (org-element-at-point)))
-          )
-        (kill-region (point) end)
-        (let ((headline-front (create-headline "Front" (+ level 1)))
-              (headline-back (create-headline "Back" (+ level 1))))
-          (insert headline-front)
-          (insert "\n")
-          (insert headline-back)
-          (insert (car kill-ring-yank-pointer))
-          )
-        )
-      )
-    )
-
-
-
-  (defun my/create-flashcard ()
-    (interactive)
-    (let ((card-type (completing-read "Choose the card type: " '("Cloze" "Basic" ) nil nil)))
-      (cond ((string= "Cloze" card-type) (my/create-cloze))
-            ((string= "Basic" card-type) (my/create-basic)))
-      ))
+  (use-package evil-snipe)
+  (evil-snipe-mode +1)
+  (evil-snipe-override-mode +1)
 #+end_src
-* Keybindings
-#+begin_src emacs-lisp
-    (defun my-counsel-p4 ()
-      (interactive)
-      (let ((counsel-fzf-cmd "find ~/Dropbox/Calibre | grep -e pdf | fzf -f \"%s\""))
-        (counsel-fzf)))
-
-
-  (general-define-key
-   "C-z" 'undo-fu-only-undo
-   "C-s-z" 'undo-fu-only-redo
-   "H-t" 'vterm-toggle)
-
-
-  (general-create-definer my-leader-def
-    :prefix "C-c")
-
-  (my-leader-def
-    "j" 'avy-goto-char-timer
-    "l" '(:ignore t :wk "elfeed")
-    "lo" 'elfeed-visit-or-play-with-mpv
-    "le" 'elfeed
-    "lu" 'elfeed-update
-    "f" 'my-counsel-p4
-    "c" 'org-capture 
-    "b" '(:ignore t :wk "Buffer")
-    "bb" 'switch-to-buffer
-    "bk" 'kill-buffer
-    "bi" 'ibuffer
-    "bw" '(switch-to-buffer-other-window :wk "Other windows")
-    "b." 'next-buffer
-    "b," 'previous-buffer
-    "w" '(:ignore t :wk "windows")
-    "wD" 'delete-window
-    "wn" 'windmove-left
-    "wi" 'windmove-right
-    "we" 'windmove-down
-    "wu" 'windmove-up
-    "ww" 'ace-window
-    "wd" '(lambda () (interactive) (ace-window 16))
-    "ws" '(lambda () (interactive) (ace-window 4))
-    "k" 'copy-line
-    "-" 'text-scale-decrease
-    "=" 'text-scale-increase
-    )
-  (my-leader-def
-    "j" 'avy-goto-char-timer
-    "l" '(:ignore t :wk "elfeed")
-    "lo" 'elfeed-visit-or-play-with-mpv
-    "le" 'elfeed
-    "lu" 'elfeed-update
-    "f" 'my-counsel-p4
-    "c" 'org-capture 
-    "b" '(:ignore t :wk "Buffer")
-    "bb" 'switch-to-buffer
-    "bk" 'kill-buffer
-    "bi" 'ibuffer
-    "bw" '(switch-to-buffer-other-window :wk "Other windows")
-    "b." 'next-buffer
-    "b," 'previous-buffer
-    "w" '(:ignore t :wk "windows")
-    "wD" 'delete-window
-    "wn" 'windmove-left
-    "wi" 'windmove-right
-    "we" 'windmove-down
-    "wu" 'windmove-up
-    "ww" 'ace-window
-    "wd" '(lambda () (interactive) (ace-window 16))
-    "ws" '(lambda () (interactive) (ace-window 4))
-    "k" 'copy-line
-    "-" 'text-scale-decrease
-    "=" 'text-scale-increase
-    "o" '(:ignore t :wk "other")
-    "ot" '(vterm-toggle)
-    "g" '(:ignore t :wk "magit")
-    "gg" 'magit-status
-    )
-#+end_src
-
+* Evil colection
+  #+begin_src emacs-lisp
+    (use-package evil-collection
+      :config
+      (evil-collection-init 'dired))
+  #+end_src
 
