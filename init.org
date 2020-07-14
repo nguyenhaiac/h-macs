@@ -66,9 +66,9 @@
    default-frame-alist '((font . "Hack Nerd Font-10"))
    tool-bar-mode nil
    menu-bar-mode nil)
+  (require 'org-tempo)
 #+end_src
 #+begin_src emacs-lisp
-  (modify-syntax-entry ?_ "w")
   (setq org-src-window-setup 'split-window-below)
   (setq w32-pass-apps-to-system nil)
   (setq w32-apps-modifier 'hyper) ; menu/app key
@@ -94,7 +94,6 @@
    custom-safe-themes t
    confirm-kill-emacs 'y-or-n-p      ; y and n instead of yes and no when quitting
    )
-  (ido-mode nil)
   (add-hook 'org-mode-hook 'hl-line-mode)
   (add-hook 'org-mode-hook 'visual-line-mode)
   (setq line-spacing 0.15)
@@ -140,7 +139,7 @@
      (load-theme 'gruvbox)
    #+end_src
 ** smart-mode-line
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle yes
   (use-package smart-mode-line-atom-one-dark-theme)
   (use-package smart-mode-line
     :config
@@ -149,7 +148,7 @@
     (add-to-list 'sml/replacer-regexp-list '("^~/Dropbox/" ":dbox:")))
 #+end_src
 ** doom-modeline
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle no
   (use-package doom-modeline
     :ensure t
     :init (doom-modeline-mode 1)
@@ -224,6 +223,7 @@
                                      :host github
                                      :repo
                                      "jtbm37/all-the-icons-dired"))
+     (add-hook 'dired-mode-hook 'all-the-icons-dired-mode)
    #+end_src
 ** Dired sidebar
    #+begin_src emacs-lisp
@@ -245,19 +245,21 @@
    #+end_src
 ** elfeed
    #+begin_src emacs-lisp
+     (use-package password-store)
      (use-package elfeed
        :config
-       (setq elfeed-db-directory "~/.cache/.elfeed"))
+       (setq elfeed-db-directory "~/.cache/.elfeed")
+       (add-hook 'elfeed-search-update-hook 'elfeed-protocol-enable))
 
      (use-package elfeed-protocol
-       :config
-       (elfeed-protocol-enable))
-     (use-package password-store)
-     (setq elfeed-protocol-ttrss-maxsize 200) ; bigger than 200 is invalid
+       :after elfeed
+       :defer t
+       :init
+       (setq elfeed-feeds (list
+                           (list "ttrss+https://admin@rss.nguyen-hai.com"
+                                 :password (password-store-get "rss.nguyen-hai.com/admin")))))
 
-     (setq elfeed-feeds (list
-                          (list "ttrss+https://admin@rss.nguyen-hai.com"
-                                :password (password-store-get "rss.nguyen-hai.com/admin"))))
+     (setq elfeed-protocol-ttrss-maxsize 200) ; bigger than 200 is invalid
 
      (add-hook 'elfeed-new-entry-hook
                (elfeed-make-tagger :feed-url "youtube\\.com"
@@ -470,10 +472,6 @@
     (setq geiser-active-implementations '(guile))
     )
 #+end_src
-** Bookmark plus
-#+begin_src emacs-lisp
-  (use-package bookmark+)
-#+end_src
 ** org-source code
 #+begin_src emacs-lisp
   (org-babel-do-load-languages
@@ -573,10 +571,21 @@
           lsp-ui-doc-position 'bottom
           lsp-ui-peek-enable t))
 
+
   (my-local-leader-def
     "gd" 'lsp-find-definition
     "gi" 'lsp-find-implementation)
 #+end_src
+** Python with elpy
+   #+begin_src emacs-lisp :tangle no
+     (use-package elpy
+       :defer t
+       :init
+       (advice-add 'python-mode :before 'elpy-enable))
+     (yas-global-mode 1)
+     (setq company-idle-delay 0
+           company-minimum-prefix-length 1)
+   #+end_src
 ** pyvenv
 #+begin_src emacs-lisp :tangle yes
   (use-package pyvenv)
@@ -595,11 +604,35 @@
                    (display-buffer-reuse-window display-buffer-at-bottom)
                    (reusable-frames . visible)
                    (window-height . 0.3))))
+  (define-key vterm-mode-map (kbd "<C-backspace>")
+      (lambda () (interactive) (vterm-send-key (kbd "C-w"))))
+  (defun vterm-counsel-yank-pop-action (orig-fun &rest args)
+    (if (equal major-mode 'vterm-mode)
+        (let ((inhibit-read-only t)
+              (yank-undo-function (lambda (_start _end) (vterm-undo))))
+          (cl-letf (((symbol-function 'insert-for-yank)
+                 (lambda (str) (vterm-send-string str t))))
+              (apply orig-fun args)))
+      (apply orig-fun args)))
+
+  (advice-add 'counsel-yank-pop-action :around #'vterm-counsel-yank-pop-action)
 #+end_src
 ** yaml-mode
 #+begin_src emacs-lisp :tangle yes
   (use-package yaml-mode)
 #+end_src
+** Projectile
+   #+begin_src emacs-lisp
+     (use-package projectile
+       :config
+       (projectile-mode 1)
+       (setq projectile-sort-order 'recentf
+             projectile-enable-caching t
+             projectile-completion-system 'ivy
+             projectile-switch-project-action #'projectile-dired)
+       (my-leader-def
+         "p" 'projectile-command-map))
+   #+end_src
 * Evil-mode
   
 #+begin_src emacs-lisp
@@ -625,7 +658,6 @@
 * Evil colection
   #+begin_src emacs-lisp
     (use-package evil-collection
-      :config
-      (evil-collection-init 'dired))
+      :init
+      (evil-collection-init))
   #+end_src
-
