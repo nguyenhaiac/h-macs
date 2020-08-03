@@ -302,12 +302,22 @@
        "e" '(:ignore t :wk "elfeed")
        "eo" 'elfeed-visit-or-play-with-mpv
        "ee" 'elfeed
+       "eE" 'elfeed-protocol-ttrss-update
        "eu" 'elfeed-update
        )
    #+end_src
 ** Password-store-get
    #+begin_src emacs-lisp
      (use-package password-store)
+   #+end_src
+** Leetcode
+   #+begin_src emacs-lisp
+     (use-package leetcode
+       :config
+       (setq leetcode-prefer-language "python3"
+             leetcode-prefer-sql "mysql"
+             leetcode-save-solutions t
+             leetcode-directory "~/leetcode"))
    #+end_src
 ** pdf-tools
    #+begin_src emacs-lisp
@@ -399,6 +409,7 @@
     "rf" 'org-roam-find-file
     "ri" 'org-roam-insert
     "rc" 'org-roam-capture)
+  (setq org-roam-db-location "~/Dropbox/brain/roamdb/roam-home.db")
 #+end_src
 ** Org-capture advice
    #+begin_src emacs-lisp
@@ -436,8 +447,7 @@
   (use-package ace-window
     :init
     (setq aw-background t)
-    (setq aw-keys '(?a ?r ?s ?t ?d ?h ?n ?e ?i))
-    (setq aw-dispatch-always t))
+    (setq aw-keys '(?a ?r ?s ?t ?d ?h ?n ?e ?i)))
   (defvar aw-dispatch-alist
     '((?x aw-delete-window "Delete Window")
           (?m aw-swap-window "Swap Windows")
@@ -480,6 +490,7 @@
      (scheme . t)
      (python . t)
      (shell . t)
+     (C . t)
      ))
 #+end_src
 ** sicp book
@@ -582,9 +593,13 @@
        :defer t
        :init
        (advice-add 'python-mode :before 'elpy-enable))
-     (yas-global-mode 1)
      (setq company-idle-delay 0
            company-minimum-prefix-length 1)
+   #+end_src
+** Yasnipet
+   #+begin_src emacs-lisp
+     (use-package yasnippet)
+     (yas-global-mode 1)
    #+end_src
 ** pyvenv
 #+begin_src emacs-lisp :tangle yes
@@ -656,8 +671,8 @@
   (evil-snipe-override-mode +1)
 #+end_src
 * Evil colection
-  #+begin_src emacs-lisp
+  #+begin_src emacs-lisp :tangle yes
     (use-package evil-collection
       :init
-      (evil-collection-init))
+      (evil-collection-init '(dired calendar elfeed)))
   #+end_src
