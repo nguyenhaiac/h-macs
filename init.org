@@ -6,7 +6,7 @@
 ;;; -*- lexical-binding: t -*-
 #+end_src
 
-* Initialize the configuration
+* Initialize the configuration 
 ** Tangle & byte compile
 *** Tangle and byte compile
 
@@ -63,7 +63,7 @@
 ** Better-default 
 #+begin_src emacs-lisp
   (setq
-   default-frame-alist '((font . "Hack Nerd Font-10"))
+   default-frame-alist '((font . "Hack Nerd Font-11"))
    tool-bar-mode nil
    menu-bar-mode nil)
   (require 'org-tempo)
@@ -72,7 +72,6 @@
   (setq org-src-window-setup 'split-window-below)
   (setq w32-pass-apps-to-system nil)
   (setq w32-apps-modifier 'hyper) ; menu/app key
-  (ido-mode nil)
   (use-package gcmh
     :config
     (gcmh-mode 1))
@@ -96,10 +95,10 @@
    )
   (add-hook 'org-mode-hook 'hl-line-mode)
   (add-hook 'org-mode-hook 'visual-line-mode)
-  (setq line-spacing 0.15)
+  (setq line-spacing 0.2)
   (lambda () (progn
-    (setq left-margin-width 2)
-    (setq right-margin-width 2)
+    (setq left-margin-width 1)
+    (setq right-margin-width 1)
     (set-window-buffer nil (current-buffer))))
   (setq org-tags-column 100)
   (defun my-org-confirm-babel-evaluate (lang body)
@@ -126,7 +125,7 @@
     )
 #+end_src
 
-* Aesthetic improvement
+* Aesthetic improvement 
 ** Theme
    #+begin_src emacs-lisp
      ;; (use-package doom-themes)
@@ -136,10 +135,13 @@
                                 :host github
                                 :repo "greduan/emacs-theme-gruvbox"
                                 ))
-     (load-theme 'gruvbox)
+     (use-package color-theme-sanityinc-tomorrow)
+     (use-package leuven-theme)
+     (color-theme-sanityinc-tomorrow-night)
+
    #+end_src
 ** smart-mode-line
-#+begin_src emacs-lisp :tangle yes
+ #+begin_src emacs-lisp :tangle no
   (use-package smart-mode-line-atom-one-dark-theme)
   (use-package smart-mode-line
     :config
@@ -148,7 +150,7 @@
     (add-to-list 'sml/replacer-regexp-list '("^~/Dropbox/" ":dbox:")))
 #+end_src
 ** doom-modeline
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle yes
   (use-package doom-modeline
     :ensure t
     :init (doom-modeline-mode 1)
@@ -184,13 +186,25 @@
       (counsel-fzf)))
 
   (my-leader-def
-    "gj" 'avy-goto-char-timer
+    "j" '(:ignore t :wk "Avy")
+    "jj" '(avy-goto-char-timer)
     "f" '(:ignore t :wk "files")
     "ff" 'counsel-find-file
     "fb" 'my-find-book
     "fs" 'save-buffer
     "fp" '(lambda () (interactive) (find-file "~/.emacs.d/init.org"))
     "fd" 'dired-sidebar-toggle-with-current-directory
+    "g" '(:ignore t :wk "Magit")
+    "gg" 'magit-status
+    "gs" 'magit-dispatch
+    "e" '(:ignore t :wk "Eval")
+    "eb" 'eval-buffer
+    "ee" 'eval-last-sexp
+    "er" 'eval-region
+    "o" '(:ignore t :wk "Org")
+    "oa" 'org-agenda
+    "op" 'my-mark-as-project
+    "ot" 'my-mark-as-task
     "c" 'org-capture 
     "b" '(:ignore t :wk "Buffer")
     "bb" 'switch-to-buffer
@@ -256,8 +270,8 @@
        :defer t
        :init
        (setq elfeed-feeds (list
-                           (list "ttrss+https://admin@rss.nguyen-hai.com"
-                                 :password (password-store-get "rss.nguyen-hai.com/admin")))))
+                           (list "ttrss+https://admin@rss.hainguyentien.com"
+                                 :password "6uv73rxT8ygdPuX"))))
 
      (setq elfeed-protocol-ttrss-maxsize 200) ; bigger than 200 is invalid
 
@@ -498,7 +512,7 @@
   (use-package sicp)
 #+end_src
 ** ivy and counsel bundle
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle yes
   (use-package ivy
     :diminish ivy-mode
     :config
@@ -512,7 +526,14 @@
     :config
     (counsel-mode 1))
   (use-package avy)
+
 #+end_src
+** Helm
+   #+begin_src emacs-lisp :tangle no
+     (use-package helm
+       :config
+       (helm-mode 1))
+   #+end_src
 ** autocompletion with company-mode
 #+begin_src emacs-lisp
   (use-package company
@@ -539,7 +560,7 @@
   (use-package org-superstar
     :config (add-hook 'org-mode-hook (lambda () (org-superstar-mode 1))))
   (setq inhibit-compacting-font-caches t)
-  (setq org-hide-emphasis-markers t)
+  (setq org-hide-emphasis-markers nil)
   (setq org-superstar-headline-bullets-list (quote ("◉" "◆" "☀" "○")))
 #+end_src
 ** undo-fu
@@ -560,13 +581,12 @@
   (use-package realgud)
 #+end_src
 ** python with lsp mode
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle no
   (use-package lsp-mode
     :if (my-system-type-is-gnu)
     :commands lsp
     :hook
-    (lsp-mode . lsp-enable-which-key-integration)
-    (python-mode . lsp))
+    (lsp-mode . lsp-enable-which-key-integration))
 
   (use-package lsp-python-ms
     :ensure t
@@ -588,7 +608,7 @@
     "gi" 'lsp-find-implementation)
 #+end_src
 ** Python with elpy
-   #+begin_src emacs-lisp :tangle no
+   #+begin_src emacs-lisp :tangle yes
      (use-package elpy
        :defer t
        :init
@@ -674,5 +694,94 @@
   #+begin_src emacs-lisp :tangle yes
     (use-package evil-collection
       :init
-      (evil-collection-init '(dired calendar elfeed)))
+      (evil-collection-init '(dired calendar elfeed leetcode realgud)))
+  #+end_src
+* Org-edna
+  #+begin_src emacs-lisp
+    (use-package org-edna)
+    (org-edna-mode)
+  #+end_src
+* Olivetti
+  #+begin_src emacs-lisp
+    (use-package olivetti)
+  #+end_src
+* Org-mode config
+  #+begin_src emacs-lisp
+    (setq org-agenda-files '("~/Dropbox/Zettel/todo.org"))
+
+    (setq org-capture-templates
+          '(("t" "Todo" entry (file "~/Dropbox/Zettel/todo.org")
+             "* TODO %?\n %i\n")))
+
+    (setq org-tags-exclude-from-inheritance '("project" "crypt"))
+
+    (defun my-mark-as-task ()
+    "This function makes sure that the current heading has
+    (2) has property COOKIE_DATA set to \"todo recursive\"
+    (3) has any TODO keyword and
+    (4) a leading progress indicator"
+        (interactive)
+        (org-set-property "COOKIE_DATA" "todo recursive")
+        (org-set-property "ORDERED" "t")
+        (org-set-property "TRIGGER" "next-sibbling todo!(NEXT)")
+        (org-back-to-heading t)
+        (let* ((title (nth 4 (org-heading-components)))
+               (keyword (nth 2 (org-heading-components))))
+           (when (and (bound-and-true-p keyword) (string-prefix-p "[" title))
+               (message "TODO keyword and progress indicator found")
+               )
+           (when (and (not (bound-and-true-p keyword)) (string-prefix-p "[" title))
+               (message "no TODO keyword but progress indicator found")
+               (forward-whitespace 1)
+               (insert "TODO ")
+               )
+           )
+    )
+
+    (defun my-mark-as-project ()
+    "This function makes sure that the current heading has
+    (1) the tag :project:
+    (2) has property COOKIE_DATA set to \"todo recursive\"
+    (3) has any TODO keyword and
+    (4) a leading progress indicator"
+        (interactive)
+        (org-toggle-tag "project" 'on)
+        (org-set-property "COOKIE_DATA" "todo recursive")
+        (org-set-property "ORDERED" "t")
+        (org-set-property "TRIGGER" "next-sibbling todo!(NEXT)")
+        (org-back-to-heading t)
+        (let* ((title (nth 4 (org-heading-components)))
+               (keyword (nth 2 (org-heading-components))))
+           (when (and (bound-and-true-p keyword) (string-prefix-p "[" title))
+               (message "TODO keyword and progress indicator found")
+               )
+           (when (and (not (bound-and-true-p keyword)) (string-prefix-p "[" title))
+               (message "no TODO keyword but progress indicator found")
+               (forward-whitespace 1)
+               (insert "NEXT ")
+               )
+           (when (and (not (bound-and-true-p keyword)) (not (string-prefix-p "[" title)))
+               (message "no TODO keyword and no progress indicator found")
+               (forward-whitespace 1)
+               (insert "NEXT [/] ")
+               )
+           (when (and (bound-and-true-p keyword) (not (string-prefix-p "[" title)))
+               (message "TODO keyword but no progress indicator found")
+               (forward-whitespace 2)
+               (insert "[/] ")
+               )
+           )
+    )
+
+    (setq org-todo-keywords
+          '((sequence "TODO(t)" "NEXT(n)" "STRT(s)" "|" "DONE(d)" "DELEGATED(D)" "CANCELLED(c)")))
+
+    (setq org-todo-keyword-faces
+          '(("TODO" . "orange") ("NEXT" . "pink") ("STRT" . "green")
+            ("DONE" . "grey") ("DELEGATED" . "blue") ("CANCELLED" "yellow")))
+
+    (setq org-tags-column 12)
+    (setq org-fast-tag-selection-single-key t)
+    (setq org-hide-leading-stars t)
+    (setq org-startup-indented t)
   #+end_src
