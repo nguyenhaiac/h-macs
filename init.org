@@ -63,7 +63,6 @@
 ** Better-default 
 #+begin_src emacs-lisp
   (setq
-   default-frame-alist '((font . "Hack Nerd Font-11"))
    tool-bar-mode nil
    menu-bar-mode nil)
   (require 'org-tempo)
@@ -95,7 +94,7 @@
    )
   (add-hook 'org-mode-hook 'hl-line-mode)
   (add-hook 'org-mode-hook 'visual-line-mode)
-  (setq line-spacing 0.2)
+  (setq line-spacing 0.5)
   (lambda () (progn
     (setq left-margin-width 1)
     (setq right-margin-width 1)
@@ -137,10 +136,11 @@
                                 ))
      (use-package color-theme-sanityinc-tomorrow)
      (use-package leuven-theme)
-     (color-theme-sanityinc-tomorrow-night)
-
+     (use-package modus-operandi-theme)
+     (use-package modus-vivendi-theme)
+     (load-theme 'modus-operandi)
    #+end_src
-** smart-mode-line
+** Smart-mode-line
  #+begin_src emacs-lisp :tangle no
   (use-package smart-mode-line-atom-one-dark-theme)
   (use-package smart-mode-line
@@ -149,7 +149,7 @@
     (sml/setup)
     (add-to-list 'sml/replacer-regexp-list '("^~/Dropbox/" ":dbox:")))
 #+end_src
-** doom-modeline
+** Doom-modeline
 #+begin_src emacs-lisp :tangle yes
   (use-package doom-modeline
     :ensure t
@@ -159,26 +159,44 @@
           doom-modeline-env-enable-python t
           doom-modeline-project-detection 'project))
 #+end_src
-** rainbow-mode
+** Rainbow-mode
 #+begin_src emacs-lisp
   (use-package rainbow-mode)
 #+end_src
+* Faces for emacs
+#+begin_src emacs-lisp
+  (set-face-attribute 'default nil :font "Hack Nerd Font-11")
+  (set-face-attribute 'fixed-pitch nil :font "Hack Nerd Font-11")
+  (set-face-attribute 'variable-pitch nil :font "Source Sans Pro-13")
+  (add-hook 'org-mode-hook 'variable-pitch-mode)
+  (custom-theme-set-faces
+   'user
+   `(org-level-1 ((t (:height 1.25))))
+   `(org-level-2 ((t (:height 1.15))))
+   `(org-level-3 ((t (:height 1.1))))
+   `(org-level-4 ((t (:height 1)))))
+  (add-to-list 'default-frame-alist
+               '(font . "Hack Nerd Font-12"))
+#+end_src
 * Keybindings
-  
 #+begin_src emacs-lisp
   (use-package general)
-  (general-evil-setup)
+  ;; (general-evil-setup)
 
   (general-create-definer my-leader-def
-      :states '(normal visual insert emacs)
-      :keymaps 'override
-      :prefix "SPC"
-      :non-normal-prefix "C-c")
+    ;; :states '(normal visual insert emacs)
+    :keymaps 'override
+    ;; :prefix "SPC"
+    :prefix "C-c"
+    ;; :non-normal-prefix "C-c"
+    )
 
   (general-create-definer my-local-leader-def
-      :keymaps '(normal visual insert emacs)
-      :prefix "SPC m"
-      :non-normal-prefix "C-c m")
+    ;; :keymaps '(normal visual insert emacs)
+    ;; :prefix "SPC m"
+    :prefix "C-c m"
+    ;; :non-normal-prefix "C-c m"
+    )
 
   (defun my-find-book ()
     (interactive)
@@ -189,7 +207,8 @@
     "j" '(:ignore t :wk "Avy")
     "jj" '(avy-goto-char-timer)
     "f" '(:ignore t :wk "files")
-    "ff" 'counsel-find-file
+    "ff" 'helm-find-files
+    "fF" 'find-file-other-window
     "fb" 'my-find-book
     "fs" 'save-buffer
     "fp" '(lambda () (interactive) (find-file "~/.emacs.d/init.org"))
@@ -202,6 +221,8 @@
     "ee" 'eval-last-sexp
     "er" 'eval-region
     "o" '(:ignore t :wk "Org")
+    "ol" 'org-store-link
+    "ow" 'olivetti-mode
     "oa" 'org-agenda
     "op" 'my-mark-as-project
     "ot" 'my-mark-as-task
@@ -216,9 +237,10 @@
     "-" 'text-scale-decrease
     "+" 'text-scale-increase
     )
-  (general-evil-define-key '(normal visual) org-mode-map
-    "ge" 'org-next-visible-heading
-    "gu" 'org-previous-visible-heading)
+
+  (general-define-key
+   "C-z" 'undo-fu-only-undo
+   "C-S-z" 'undo-fu-only-redo)
     #+end_src
 
 * Utilities setup
@@ -338,6 +360,14 @@
      (use-package pdf-tools   
        :config   (pdf-tools-install)   
        (setq-default pdf-view-display-size 'fit-page))
+     (use-package org-pdftools
+       :hook (org-load . org-pdftools-setup-link))
+
+     (use-package org-noter-pdftools
+       :after org-noter
+       :config
+       (with-eval-after-load 'pdf-annot
+         (add-hook 'pdf-annot-activate-handler-functions #'org-noter-pdftools-jump-to-note)))
    #+end_src
 ** Org-noter
    #+begin_src emacs-lisp
@@ -365,7 +395,7 @@
     :hook 
     (after-init . org-roam-mode)
     :custom
-    (org-roam-directory "~/Dropbox/brain"))
+    (org-roam-directory "~/Dropbox/Zettel"))
   (use-package company-org-roam
     :straight (:host github :repo "jethrokuan/company-org-roam")
     :config
@@ -529,7 +559,7 @@
 
 #+end_src
 ** Helm
-   #+begin_src emacs-lisp :tangle no
+   #+begin_src emacs-lisp :tangle yes
      (use-package helm
        :config
        (helm-mode 1))
@@ -576,24 +606,23 @@
 #+begin_src emacs-lisp :tangle yes
   (use-package magit)
 #+end_src
-** python debugging with realgud
+** Python debugging with realgud
 #+begin_src emacs-lisp :tangle yes
   (use-package realgud)
 #+end_src
-** python with lsp mode
-#+begin_src emacs-lisp :tangle no
+** Python with lsp mode
+#+begin_src emacs-lisp :tangle yes
   (use-package lsp-mode
     :if (my-system-type-is-gnu)
     :commands lsp
     :hook
     (lsp-mode . lsp-enable-which-key-integration))
 
-  (use-package lsp-python-ms
-    :ensure t
-    :init (setq lsp-python-ms-auto-install-server t)
+  (use-package lsp-pyright
+    :straight (lsp-pyright :type git :host github :repo "emacs-lsp/lsp-pyright")
     :hook (python-mode . (lambda ()
-                           (require 'lsp-python-ms)
-                           (lsp))))  ; or lsp-deferred
+                            (require 'lsp-pyright)
+                            (lsp))))  ; or lsp-deferred
 
   (use-package lsp-ui
     :config
@@ -608,7 +637,7 @@
     "gi" 'lsp-find-implementation)
 #+end_src
 ** Python with elpy
-   #+begin_src emacs-lisp :tangle yes
+   #+begin_src emacs-lisp :tangle no
      (use-package elpy
        :defer t
        :init
@@ -621,11 +650,11 @@
      (use-package yasnippet)
      (yas-global-mode 1)
    #+end_src
-** pyvenv
+** Pyvenv
 #+begin_src emacs-lisp :tangle yes
   (use-package pyvenv)
 #+end_src
-** vterm
+** Vterm
 #+begin_src emacs-lisp :tangle yes
   (use-package vterm
     :if (my-system-type-is-gnu))
@@ -652,7 +681,7 @@
 
   (advice-add 'counsel-yank-pop-action :around #'vterm-counsel-yank-pop-action)
 #+end_src
-** yaml-mode
+** Yaml-mode
 #+begin_src emacs-lisp :tangle yes
   (use-package yaml-mode)
 #+end_src
@@ -669,8 +698,7 @@
          "p" 'projectile-command-map))
    #+end_src
 * Evil-mode
-  
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
   (use-package evil
     :init
     (setq evil-disable-insert-state-bindings t
@@ -691,7 +719,7 @@
   (evil-snipe-override-mode +1)
 #+end_src
 * Evil colection
-  #+begin_src emacs-lisp :tangle yes
+  #+begin_src emacs-lisp :tangle no
     (use-package evil-collection
       :init
       (evil-collection-init '(dired calendar elfeed leetcode realgud)))
@@ -708,10 +736,14 @@
 * Org-mode config
   #+begin_src emacs-lisp
     (setq org-agenda-files '("~/Dropbox/Zettel/todo.org"))
+    (push 'org-habit org-modules)
+    (setq org-habit-show-habits-only-for-today nil)
 
     (setq org-capture-templates
           '(("t" "Todo" entry (file "~/Dropbox/Zettel/todo.org")
-             "* TODO %?\n %i\n")))
+             "* TODO %?\n %i\n")
+            ("n" "Notes" entry (file "~/Dropbox/Zettel/20200829215348-brains.org")
+             "* %?\n %i\n")))
 
     (setq org-tags-exclude-from-inheritance '("project" "crypt"))
 
@@ -721,7 +753,7 @@
     (3) has any TODO keyword and
     (4) a leading progress indicator"
         (interactive)
-        (org-set-property "COOKIE_DATA" "todo recursive")
+        (org-set-property "COOKIE_DATA" "todo recursive") 
         (org-set-property "ORDERED" "t")
         (org-set-property "TRIGGER" "next-sibbling todo!(NEXT)")
         (org-back-to-heading t)
@@ -784,4 +816,11 @@
     (setq org-fast-tag-selection-single-key t)
     (setq org-hide-leading-stars t)
     (setq org-startup-indented t)
-  #+end_src
+  #+end_src  
+* Helm-recoll
+#+begin_src emacs-lisp
+  (use-package helm-recoll
+    :commands helm-recoll
+    :init (setq helm-recoll-directories
+                '(("Dropbox" . "~/.recoll"))))
+#+end_src
