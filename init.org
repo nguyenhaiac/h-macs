@@ -187,7 +187,7 @@
    `(org-level-4 ((t (:height 1)))))
   (add-to-list 'default-frame-alist
                '(font . "Hack Nerd Font-12")
-               '(font . "Caskaydiacove-12"))
+               '(font . "CaskaydiaCove-12"))
 #+end_src
 * Keybindings
 #+begin_src emacs-lisp
@@ -669,33 +669,28 @@
 #+begin_src emacs-lisp :tangle yes
   (use-package vterm
     :if (my-system-type-is-gnu))
+
   (use-package vterm-toggle
-    :if (my-system-type-is-gnu)
     :straight (vterm-toggle :type git :host github :repo "jixiuf/vterm-toggle")
     :if (my-system-type-is-gnu)
     :config
     (setq vterm-toggle-fullscreen-p nil)
-    (define-key vterm-mode-map (kbd "<C-backspace>")
-      (defun vterm-counsel-yank-pop-action (orig-fun &rest args)
-        (if (equal major-mode 'vterm-mode)
-            (let ((inhibit-read-only t)
-                  (yank-undo-function (lambda (_start _end) (vterm-undo))))
-              (cl-letf (((symbol-function 'insert-for-yank)
-                         (lambda (str) (vterm-send-string str t))))
-                (apply orig-fun args)))
-          (apply orig-fun args)))
-      (lambda () (interactive) (vterm-send-key (kbd "C-w"))))
     (add-to-list 'display-buffer-alist
                  '("^v?term.*"
                    (display-buffer-reuse-window display-buffer-at-bottom)
                    (reusable-frames . visible)
                    (window-height . 0.3)))
+    (define-key vterm-mode-map (kbd "<C-backspace>")
+      (lambda () (interactive) (vterm-send-key (kbd "C-w"))))
+    (defun vterm-counsel-yank-pop-action (orig-fun &rest args)
+      (if (equal major-mode 'vterm-mode)
+          (let ((inhibit-read-only t)
+                (yank-undo-function (lambda (_start _end) (vterm-undo))))
+            (cl-letf (((symbol-function 'insert-for-yank)
+                       (lambda (str) (vterm-send-string str t))))
+              (apply orig-fun args)))
+        (apply orig-fun args)))
     (advice-add 'counsel-yank-pop-action :around #'vterm-counsel-yank-pop-action))
-
-
-
-
-
 #+end_src
 ** Yaml-mode
 #+begin_src emacs-lisp :tangle yes
