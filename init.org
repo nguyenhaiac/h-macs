@@ -165,9 +165,19 @@
 #+end_src
 * Faces for emacs
 #+begin_src emacs-lisp
-  (set-face-attribute 'default nil :font "Hack Nerd Font-11")
-  (set-face-attribute 'fixed-pitch nil :font "Hack Nerd Font-11")
-  (set-face-attribute 'variable-pitch nil :font "Source Sans Pro-13")
+  (when (my-system-type-is-gnu)
+    (set-face-attribute 'default nil :font "Hack Nerd Font-11")
+    (set-face-attribute 'fixed-pitch nil :font "Hack Nerd Font-11")
+    )
+
+  (when (my-system-type-is-windows)
+    (set-face-attribute 'default nil :font "CaskaydiaCove NF-11")
+    (set-face-attribute 'fixed-pitch nil :font "Caskaydiacove NF-11")
+    )
+
+  (set-face-attribute 'variable-pitch nil :font "Source Sans Pro-13")  
+
+
   (add-hook 'org-mode-hook 'variable-pitch-mode)
   (custom-theme-set-faces
    'user
@@ -176,7 +186,8 @@
    `(org-level-3 ((t (:height 1.1))))
    `(org-level-4 ((t (:height 1)))))
   (add-to-list 'default-frame-alist
-               '(font . "Hack Nerd Font-12"))
+               '(font . "Hack Nerd Font-12")
+               '(font . "Caskaydiacove-12"))
 #+end_src
 * Keybindings
 #+begin_src emacs-lisp
@@ -659,27 +670,32 @@
   (use-package vterm
     :if (my-system-type-is-gnu))
   (use-package vterm-toggle
+    :if (my-system-type-is-gnu)
     :straight (vterm-toggle :type git :host github :repo "jixiuf/vterm-toggle")
     :if (my-system-type-is-gnu)
     :config
     (setq vterm-toggle-fullscreen-p nil)
+    (define-key vterm-mode-map (kbd "<C-backspace>")
+      (defun vterm-counsel-yank-pop-action (orig-fun &rest args)
+        (if (equal major-mode 'vterm-mode)
+            (let ((inhibit-read-only t)
+                  (yank-undo-function (lambda (_start _end) (vterm-undo))))
+              (cl-letf (((symbol-function 'insert-for-yank)
+                         (lambda (str) (vterm-send-string str t))))
+                (apply orig-fun args)))
+          (apply orig-fun args)))
+      (lambda () (interactive) (vterm-send-key (kbd "C-w"))))
     (add-to-list 'display-buffer-alist
                  '("^v?term.*"
                    (display-buffer-reuse-window display-buffer-at-bottom)
                    (reusable-frames . visible)
-                   (window-height . 0.3))))
-  (define-key vterm-mode-map (kbd "<C-backspace>")
-      (lambda () (interactive) (vterm-send-key (kbd "C-w"))))
-  (defun vterm-counsel-yank-pop-action (orig-fun &rest args)
-    (if (equal major-mode 'vterm-mode)
-        (let ((inhibit-read-only t)
-              (yank-undo-function (lambda (_start _end) (vterm-undo))))
-          (cl-letf (((symbol-function 'insert-for-yank)
-                 (lambda (str) (vterm-send-string str t))))
-              (apply orig-fun args)))
-      (apply orig-fun args)))
+                   (window-height . 0.3)))
+    (advice-add 'counsel-yank-pop-action :around #'vterm-counsel-yank-pop-action))
 
-  (advice-add 'counsel-yank-pop-action :around #'vterm-counsel-yank-pop-action)
+
+
+
+
 #+end_src
 ** Yaml-mode
 #+begin_src emacs-lisp :tangle yes
