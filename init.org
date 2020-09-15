@@ -174,28 +174,30 @@
    `(org-level-1 ((t (:height 1.25))))
    `(org-level-2 ((t (:height 1.15))))
    `(org-level-3 ((t (:height 1.1))))
-   `(org-level-4 ((t (:height 1)))))
+   `(org-level-4 ((t (:height 1.1))))
+   `(org-level-5((t (:height 1.0)))))
   (add-to-list 'default-frame-alist
                '(font . "Hack NF-12"))
 #+end_src
 * Keybindings
+:PROPERTIES:
+:COOKIE_DATA: todo recursive
+:ORDERED:  t
+:TRIGGER:  next-sibbling todo!(NEXT)
+:END:
 #+begin_src emacs-lisp
   (use-package general)
-  ;; (general-evil-setup)
+  (general-evil-setup)
 
   (general-create-definer my-leader-def
-    ;; :states '(normal visual insert emacs)
+    :states '(normal visual emacs)
     :keymaps 'override
-    ;; :prefix "SPC"
-    :prefix "C-c"
-    ;; :non-normal-prefix "C-c"
+    :prefix "SPC"
     )
 
   (general-create-definer my-local-leader-def
-    ;; :keymaps '(normal visual insert emacs)
-    ;; :prefix "SPC m"
-    :prefix "C-c m"
-    ;; :non-normal-prefix "C-c m"
+    :keymaps '(normal visual emacs)
+    :prefix "SPC m"
     )
 
   (defun my-find-book ()
@@ -205,9 +207,9 @@
 
   (my-leader-def
     "j" '(:ignore t :wk "Avy")
-    "jj" '(avy-goto-char-timer)
+    "jj" 'avy-goto-char-timer
     "f" '(:ignore t :wk "files")
-    "ff" 'helm-find-files
+    "ff" 'counsel-find-file
     "fF" 'find-file-other-window
     "fb" 'my-find-book
     "fs" 'save-buffer
@@ -226,6 +228,7 @@
     "oa" 'org-agenda
     "op" 'my-mark-as-project
     "ot" 'my-mark-as-task
+    "ov" 'vterm-toggle
     "c" 'org-capture 
     "b" '(:ignore t :wk "Buffer")
     "bb" 'switch-to-buffer
@@ -236,6 +239,15 @@
     "b," 'previous-buffer
     "-" 'text-scale-decrease
     "+" 'text-scale-increase
+    "w" '(:ignore t :wk "windows")
+    "wD" 'delete-window
+    "wn" 'windmove-left
+    "wi" 'windmove-right
+    "we" 'windmove-down
+    "wu" 'windmove-up
+    "ww" 'ace-window
+    "wd" '(lambda () (interactive) (ace-window 16))
+    "ws" '(lambda () (interactive) (ace-window 4))
     )
 
   (general-define-key
@@ -281,21 +293,14 @@
    #+end_src
 ** elfeed
    #+begin_src emacs-lisp
-     (use-package password-store)
      (use-package elfeed
        :config
-       (setq elfeed-db-directory "~/.cache/.elfeed")
-       (add-hook 'elfeed-search-update-hook 'elfeed-protocol-enable))
+       (setq elfeed-db-directory "~/.cache/.elfeed"))
 
-     (use-package elfeed-protocol
-       :after elfeed
-       :defer t
-       :init
-       (setq elfeed-feeds (list
-                           (list "ttrss+https://admin@rss.hainguyentien.com"
-                                 :password "6uv73rxT8ygdPuX"))))
-
-     (setq elfeed-protocol-ttrss-maxsize 200) ; bigger than 200 is invalid
+     (use-package elfeed-org
+       :config
+       (elfeed-org)
+       (setq rmh-elfeed-org-files (list "~/.emacs.d/elfeed.org")))
 
      (add-hook 'elfeed-new-entry-hook
                (elfeed-make-tagger :feed-url "youtube\\.com"
@@ -333,18 +338,6 @@
            (if (eq major-mode 'elfeed-search-mode)
                (elfeed-search-browse-url)
              (elfeed-show-visit)))))
-
-     (my-leader-def
-       "e" '(:ignore t :wk "elfeed")
-       "eo" 'elfeed-visit-or-play-with-mpv
-       "ee" 'elfeed
-       "eE" 'elfeed-protocol-ttrss-update
-       "eu" 'elfeed-update
-       )
-   #+end_src
-** Password-store-get
-   #+begin_src emacs-lisp
-     (use-package password-store)
    #+end_src
 ** Leetcode
    #+begin_src emacs-lisp
@@ -390,6 +383,11 @@
        )
    #+end_src
 ** Org-roam
+:PROPERTIES:
+:COOKIE_DATA: todo recursive
+:ORDERED:  t
+:TRIGGER:  next-sibbling todo!(NEXT)
+:END:
 #+begin_src emacs-lisp
   (use-package org-roam
     :hook 
@@ -513,18 +511,9 @@
           (?o delete-other-windows "Delete Other Windows")
           (?? aw-show-dispatch-help))
     "List of actions for `aw-dispatch-default'.")
-  (global-set-key (kbd "M-o") 'ace-window)
-  (my-leader-def
-    "w" '(:ignore t :wk "windows")
-    "wD" 'delete-window
-    "wn" 'windmove-left
-    "wi" 'windmove-right
-    "we" 'windmove-down
-    "wu" 'windmove-up
-    "ww" 'ace-window
-    "wd" '(lambda () (interactive) (ace-window 16))
-    "ws" '(lambda () (interactive) (ace-window 4))
-    )
+
+
+
 #+end_src
 ** geiser
 #+begin_src emacs-lisp :tangle yes
@@ -566,7 +555,7 @@
 
 #+end_src
 ** Helm
-   #+begin_src emacs-lisp :tangle yes
+   #+begin_src emacs-lisp :tangle no
      (use-package helm
        :config
        (helm-mode 1))
@@ -588,9 +577,6 @@
 ** smartparens
 #+begin_src emacs-lisp
   (use-package smartparens
-    :config
-    (smartparens-global-mode)
-    (require 'smartparens-config)
     :general
     (:keymaps 'smartparens-mode-map
               "C-M-f" 'sp-forward-sexp 
@@ -614,6 +600,7 @@
               "M-<backspace>" 'sp-backward-unwrap-sexp
               )
     )
+  (smartparens-global-mode)
 #+end_src
 ** org-bullets
 #+begin_src emacs-lisp
@@ -621,7 +608,7 @@
     :config (add-hook 'org-mode-hook (lambda () (org-superstar-mode 1))))
   (setq inhibit-compacting-font-caches t)
   (setq org-hide-emphasis-markers nil)
-  (setq org-superstar-headline-bullets-list (quote ("◉" "◆" "☀" "○")))
+  (setq org-superstar-headline-bullets-list (quote ("◉" "◆" "☀" "○" "○" "○")))
   (setq org-superstar-special-todo-items t)
   (setq org-superstar-todo-bullet-alist
           '(("TODO" "☐　")
@@ -630,8 +617,21 @@
             ("CANCELLED" "✘　")
             ("DONE" "✔　")))
   (org-superstar-restart)
-  (setq org-indent-indentation-per-level 6)
+  (setq org-indent-indentation-per-level 2)
   (setq org-indent-boundary-char ?　)
+
+  (setq-default prettify-symbols-alist '(("TODO" . 32)
+                                         ("NEXT" . 32)
+                                         ("DONE" . 32)
+                                         ("CANCELLED" . 32)
+                                         ("WAIT" . 32)
+                                         ("lambda" . ?λ)
+                                         ("->" . ?→)
+                                         ("->>" . ?↠)
+                                         ("=>" . ?⇒)
+                                         ("map" . ?↦)
+                                 ))
+  (add-hook 'org-mode-hook 'prettify-symbols-mode)
 #+end_src
 ** undo-fu
 #+begin_src emacs-lisp
@@ -658,23 +658,26 @@
     :hook
     (lsp-mode . lsp-enable-which-key-integration))
 
-  (use-package lsp-pyright
-    :straight (lsp-pyright :type git :host github :repo "emacs-lsp/lsp-pyright")
-    :hook (python-mode . (lambda ()
-                            (require 'lsp-pyright)
-                            (lsp))))  ; or lsp-deferred
+  ;; (use-package lsp-pyright
+  ;;   :straight (lsp-pyright :type git :host github :repo "emacs-lsp/lsp-pyright")
+  ;;   :hook (python-mode . (lambda ()
+  ;;                           (require 'lsp-pyright)
+  ;;                           (lsp))))
+  ;;                                         ; or lsp-deferred
 
   (use-package lsp-ui
     :config
     (setq lsp-ui-doc-enable nil
           lsp-ui-doc-delay 0.1
-          lsp-ui-doc-position 'bottom
+          lsp-ui-doc-position 'at-point
           lsp-ui-peek-enable t))
 
 
   (my-local-leader-def
     "gd" 'lsp-find-definition
     "gi" 'lsp-find-implementation)
+
+  (setq lsp-enable-file-watchers nil)
 #+end_src
 ** Python with elpy
    #+begin_src emacs-lisp :tangle no
@@ -697,7 +700,8 @@
 ** Vterm
 #+begin_src emacs-lisp :tangle yes
   (use-package vterm
-    :if (my-system-type-is-gnu))
+    :if (my-system-type-is-gnu)
+    )
   (use-package vterm-toggle
     :straight (vterm-toggle :type git :host github :repo "jixiuf/vterm-toggle")
     :if (my-system-type-is-gnu)
@@ -729,27 +733,6 @@
        (my-leader-def
          "p" 'projectile-command-map))
    #+end_src
-* Evil-mode
-#+begin_src emacs-lisp :tangle no
-  (use-package evil
-    :init
-    (setq evil-disable-insert-state-bindings t
-          evil-want-C-i-jump t
-          evil-want-C-u-scroll t
-          evil-want-integration t
-          evil-want-keybinding nil)
-    :config
-    (evil-set-initial-state 'magit-mode 'emacs)
-    (evil-set-initial-state 'info-mode 'emacs)
-    (evil-mode t))
-
-  (use-package evil-commentary)
-  (evil-commentary-mode)
-
-  (use-package evil-snipe)
-  (evil-snipe-mode +1)
-  (evil-snipe-override-mode +1)
-#+end_src
 * Evil colection
   #+begin_src emacs-lisp :tangle no
     (use-package evil-collection
@@ -858,6 +841,13 @@
         )
       )
 
+
+    (defun markdown-convert-buffer-to-org ()
+        "Convert the current buffer's content from markdown to orgmode format and save it with the current buffer's file name but with .org extension."
+        (interactive)
+        (shell-command-on-region (point-min) (point-max)
+                                 (format "pandoc -f markdown -t org -o %s"
+                                         (concat (file-name-sans-extension (buffer-file-name)) ".org"))))
       #+end_src  
 * Helm-recoll
 #+begin_src emacs-lisp
@@ -865,4 +855,27 @@
     :commands helm-recoll
     :init (setq helm-recoll-directories
                 '(("Dropbox" . "~/.recoll"))))
+#+end_src
+* Evil-mode
+#+begin_src emacs-lisp :tangle yes
+  (use-package evil
+    :init
+    (setq evil-disable-insert-state-bindings t
+          evil-want-C-i-jump t
+          evil-want-C-u-scroll t
+          evil-want-integration t
+          evil-want-keybinding nil)
+    :config
+    (evil-set-initial-state 'dired-mode 'emacs)
+    (evil-make-overriding-map dired-mode-map 'normal)
+    (evil-make-overriding-map pdf-view-mode-map 'normal)
+    (evil-set-initial-state 'pdf-view-mode 'emacs)
+    (evil-mode t))
+
+  (use-package evil-commentary)
+  (evil-commentary-mode)
+
+  (use-package evil-snipe)
+  (evil-snipe-mode +1)
+  (evil-snipe-override-mode +1)
 #+end_src
